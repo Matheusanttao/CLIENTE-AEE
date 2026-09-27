@@ -7,7 +7,22 @@ import { addFavorite, getFavoriteProductIds, removeFavorite } from '../services/
 import { cn } from '../utils/cn'
 import { useToast } from './ui'
 
-export function FavoriteButton({ productId, className }: { productId: string; className?: string }) {
+const baseClass =
+  'relative grid shrink-0 place-items-center rounded-full border bg-white transition-colors duration-200 ' +
+  'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 ' +
+  // Area de toque um pouco maior que o circulo visivel
+  "after:absolute after:-inset-1 after:content-['']"
+
+export function FavoriteButton({
+  productId,
+  className,
+  size = 'sm',
+}: {
+  productId: string
+  className?: string
+  /** sm = 36px (cards) | md = 44px (pagina do produto) */
+  size?: 'sm' | 'md'
+}) {
   const { user } = useAuth()
   const { notify } = useToast()
   const queryClient = useQueryClient()
@@ -19,13 +34,15 @@ export function FavoriteButton({ productId, className }: { productId: string; cl
   })
 
   const isFavorite = favoriteIds.has(productId)
+  const sizeClass = size === 'md' ? 'h-11 w-11' : 'h-9 w-9'
+  const iconSize = size === 'md' ? 20 : 17
 
   const toggle = async (event: MouseEvent) => {
     event.preventDefault()
     event.stopPropagation()
 
     if (!user) {
-      notify('Faca login para salvar favoritos', 'error')
+      notify('Faça login para salvar favoritos', 'error')
       return
     }
 
@@ -40,7 +57,7 @@ export function FavoriteButton({ productId, className }: { productId: string; cl
       await queryClient.invalidateQueries({ queryKey: ['favorite-ids', user.id] })
       await queryClient.invalidateQueries({ queryKey: ['favorites', user.id] })
     } catch {
-      notify('Nao foi possivel atualizar favoritos', 'error')
+      notify('Não foi possível atualizar favoritos', 'error')
     }
   }
 
@@ -48,10 +65,11 @@ export function FavoriteButton({ productId, className }: { productId: string; cl
     return (
       <Link
         to="/login"
-        aria-label="Favoritos"
-        className={cn('grid h-9 w-9 place-items-center rounded-full bg-white/90 text-black shadow-sm', className)}
+        aria-label="Entrar para salvar nos favoritos"
+        title="Salvar nos favoritos"
+        className={cn(baseClass, sizeClass, 'border-line text-ink hover:border-[#D0D5DD] hover:text-brand', className)}
       >
-        <Heart size={18} />
+        <Heart size={iconSize} strokeWidth={1.8} aria-hidden />
       </Link>
     )
   }
@@ -60,14 +78,19 @@ export function FavoriteButton({ productId, className }: { productId: string; cl
     <button
       type="button"
       aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+      aria-pressed={isFavorite}
+      title={isFavorite ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
       className={cn(
-        'grid h-9 w-9 place-items-center rounded-full bg-white/90 shadow-sm transition',
-        isFavorite ? 'text-red-500' : 'text-black hover:text-red-500',
+        baseClass,
+        sizeClass,
+        isFavorite
+          ? 'border-brand-soft text-brand hover:border-brand'
+          : 'border-line text-ink hover:border-[#D0D5DD] hover:text-brand',
         className,
       )}
       onClick={toggle}
     >
-      <Heart size={18} fill={isFavorite ? 'currentColor' : 'none'} />
+      <Heart size={iconSize} strokeWidth={1.8} fill={isFavorite ? 'currentColor' : 'none'} aria-hidden />
     </button>
   )
 }

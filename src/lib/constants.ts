@@ -5,7 +5,7 @@ export const CORREIOS_MAX_WEIGHT_KG = 30
 
 export const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER ?? '5511999999999'
 
-export const whatsappUrl = (message = 'Ola! Preciso de ajuda com meu pedido na Passarin Suplementos.') =>
+export const whatsappUrl = (message = 'Olá! Gostaria de atendimento da A&E Total Mix.') =>
   `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
 
 /** Preferir useSiteSettings().settings.categories — vazio ate o admin configurar */

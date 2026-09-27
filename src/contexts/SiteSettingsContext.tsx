@@ -37,8 +37,8 @@ function applyTheme(settings: SiteSettings) {
   const root = document.documentElement
   root.style.setProperty('--color-brand', settings.color_brand)
   root.style.setProperty('--color-brand-hover', settings.color_brand_hover)
-  root.style.setProperty('--color-brand-soft', lightenHex(settings.color_brand, 0.72))
-  root.style.setProperty('--color-brand-mint', lightenHex(settings.color_brand, 0.88))
+  root.style.setProperty('--color-brand-soft', lightenHex(settings.color_brand, 0.86))
+  root.style.setProperty('--color-brand-mint', lightenHex(settings.color_brand, 0.93))
   root.style.setProperty('--color-ink', settings.color_ink)
   root.style.setProperty('--color-ink-soft', lightenHex(settings.color_ink, 0.08))
   root.style.setProperty('--color-promo', settings.color_promo)
@@ -69,10 +69,9 @@ function applyFavicon(settings: SiteSettings) {
     return
   }
 
-  upsertLink('icon', '/favicon.svg', 'image/svg+xml')
-  upsertLink('shortcut icon', '/favicon.svg', 'image/svg+xml')
-  const apple = document.head.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]')
-  if (apple) apple.href = '/favicon.svg'
+  upsertLink('icon', '/aee-icon.png', 'image/png')
+  upsertLink('shortcut icon', '/aee-icon.png', 'image/png')
+  upsertLink('apple-touch-icon', '/aee-icon.png')
 }
 
 function preloadLogo(url: string) {

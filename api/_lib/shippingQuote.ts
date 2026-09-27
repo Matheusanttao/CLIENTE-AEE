@@ -54,7 +54,7 @@ const buildPackage = (items: ShippingQuoteItem[]) => {
 export async function quoteShipping(cep: string, items: ShippingQuoteItem[]): Promise<ShippingQuote[]> {
   const token = process.env.SUPERFRETE_TOKEN
   const originCep = onlyDigits(process.env.SUPERFRETE_ORIGIN_CEP ?? '')
-  const userAgent = process.env.SUPERFRETE_USER_AGENT ?? 'Passarin Suplementos (contato@passarinsuplementos.com.br)'
+  const userAgent = process.env.SUPERFRETE_USER_AGENT ?? 'A&E Total Mix (contato@passarinsuplementos.com.br)'
   const environment = process.env.SUPERFRETE_ENV ?? 'production'
   const services = process.env.SUPERFRETE_SERVICES ?? '1,2,17'
   const baseUrl = environment === 'production' ? 'https://api.superfrete.com' : 'https://sandbox.superfrete.com'

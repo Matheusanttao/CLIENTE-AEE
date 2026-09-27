@@ -1,5 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import {
+  getAvailableProductBrands,
   getAvailableProductCategories,
   getBestSellingProducts,
   getProductBySlug,
@@ -8,16 +9,28 @@ import {
 } from '../services/products'
 import type { CatalogFilters, Product } from '../types'
 
-export const useProducts = (filters: CatalogFilters) =>
+/**
+ * Lista paginada do catalogo.
+ * `keepPrevious` mantem a pagina anterior na tela enquanto os novos filtros carregam
+ * (evita a grade "piscar" com skeletons a cada troca de filtro ou de pagina).
+ */
+export const useProducts = (filters: CatalogFilters, options: { keepPrevious?: boolean } = {}) =>
   useQuery({
     queryKey: ['products', filters],
     queryFn: () => getProducts(filters),
+    placeholderData: options.keepPrevious ? keepPreviousData : undefined,
   })
 
 export const useAvailableProductCategories = () =>
   useQuery({
     queryKey: ['products', 'available-categories'],
     queryFn: getAvailableProductCategories,
+  })
+
+export const useAvailableProductBrands = () =>
+  useQuery({
+    queryKey: ['products', 'available-brands'],
+    queryFn: getAvailableProductBrands,
   })
 
 export const useBestSellingProducts = () =>

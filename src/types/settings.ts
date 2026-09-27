@@ -1,3 +1,5 @@
+import { brandImages, brandPhoto } from '../lib/brandImages'
+
 export type SiteCategory = {
   name: string
   label: string
@@ -73,7 +75,7 @@ export type SiteSettings = {
 }
 
 /** Imagem padrao ao criar categoria vazia no admin (nao exposta na loja sozinha). */
-export const DEFAULT_CATEGORY_IMAGE = '/categories/proteinas.png'
+export const DEFAULT_CATEGORY_IMAGE = brandImages.categoryDefault
 
 /**
  * Sugestoes opcionais no painel admin — NAO sao aplicadas automaticamente na loja.
@@ -81,51 +83,33 @@ export const DEFAULT_CATEGORY_IMAGE = '/categories/proteinas.png'
  */
 export const suggestedCategories: SiteCategory[] = [
   {
-    name: 'Proteínas',
-    label: 'PROTEÍNAS',
-    image: '/categories/proteinas.png',
+    name: 'Tênis',
+    label: 'Tênis',
+    image: brandImages.categorySneakers,
     show_in_nav: true,
   },
   {
-    name: 'Creatina',
-    label: 'CREATINA',
-    image: '/categories/creatina.png',
+    name: 'Perfumes',
+    label: 'Perfumes',
+    image: brandImages.categoryPerfumes,
     show_in_nav: true,
   },
   {
-    name: 'Pré-Treino e Energia',
-    label: 'PRÉ-TREINO',
-    image: '/categories/pre-treino.png',
+    name: 'Tênis Masculino',
+    label: 'Masculino',
+    image: brandPhoto('sneakerWhite', 800, 1000),
     show_in_nav: true,
   },
   {
-    name: 'Aminoácidos e Performance',
-    label: 'AMINOÁCIDOS',
-    image: '/categories/aminoacidos.png',
+    name: 'Tênis Feminino',
+    label: 'Feminino',
+    image: brandPhoto('sneakerOnFoot', 800, 1000),
     show_in_nav: true,
   },
   {
-    name: 'Vitaminas e Saúde',
-    label: 'VITAMINAS',
-    image: '/categories/vitaminas.png',
-    show_in_nav: true,
-  },
-  {
-    name: 'Emagrecimento',
-    label: 'EMAGRECIMENTO',
-    image: '/categories/emagrecimento.png',
-    show_in_nav: true,
-  },
-  {
-    name: 'Alimentos e Snacks',
-    label: 'ALIMENTOS',
-    image: '/categories/alimentos.png',
-    show_in_nav: true,
-  },
-  {
-    name: 'Acessórios',
-    label: 'ACESSÓRIOS',
-    image: '/categories/acessorios.png',
+    name: 'Perfumes Importados',
+    label: 'Importados',
+    image: brandPhoto('perfumeStand', 800, 1000),
     show_in_nav: true,
   },
 ]
@@ -134,25 +118,25 @@ export const suggestedCategories: SiteCategory[] = [
 export const defaultCategories = suggestedCategories
 
 export const defaultSiteSettings: SiteSettings = {
-  store_name: 'Passarin Suplementos',
-  store_name_short: 'Passarin',
-  store_tagline: 'Suplementos em Betim',
+  store_name: 'A&E Total Mix',
+  store_name_short: 'A&E Total Mix',
+  store_tagline: 'Varejo e Atacado',
   logo_enabled: true,
-  logo_url: '/passarin-logo.png',
+  logo_url: '/aee-wordmark.webp',
   logo_show_text: false,
-  logo_as_favicon: true,
+  logo_as_favicon: false,
   support_email: 'contato@fitstore.com.br',
   whatsapp_number: '5511999999999',
-  whatsapp_message: 'Ola! Preciso de ajuda com meu pedido na Passarin Suplementos.',
+  whatsapp_message: 'Olá! Gostaria de atendimento da A&E Total Mix.',
   whatsapp_button_enabled: true,
 
-  color_brand: '#c4f000',
-  color_brand_hover: '#b2dd00',
-  color_ink: '#0d0f12',
-  color_promo: '#dc2626',
+  color_brand: '#0066FF',
+  color_brand_hover: '#0052CC',
+  color_ink: '#101828',
+  color_promo: '#0066FF',
 
   topbar_enabled: true,
-  topbar_text: 'Frete grátis para todo Brasil acima de R$199',
+  topbar_text: 'Varejo e atacado · Enviamos para todo o Brasil',
 
   free_shipping_enabled: true,
   free_shipping_threshold: 199,
@@ -162,26 +146,25 @@ export const defaultSiteSettings: SiteSettings = {
   pix_discount_percent: 10,
   installments_text: 'Parcele em até 12x',
 
-  hero_eyebrow: 'Loja de suplementos em Betim',
-  hero_title: 'Mais energia. Mais foco.',
-  hero_title_highlight: 'Melhores resultados.',
-  hero_subtitle:
-    'Whey protein, creatina, vitaminas e produtos fitness com qualidade garantida. Atendemos Betim e enviamos para todo o Brasil.',
-  hero_cta_label: 'Compre agora',
-  hero_image_url: '/hero-athlete.png',
+  hero_eyebrow: 'Varejo e atacado',
+  hero_title: 'Tênis e perfumes',
+  hero_title_highlight: 'para o seu estilo',
+  hero_subtitle: 'Escolha para você ou compre em quantidade para revender. Atendimento direto pelo WhatsApp.',
+  hero_cta_label: 'Ver produtos',
+  hero_image_url: brandImages.heroSneaker,
 
-  meta_title: 'Passarim Suplementos | Loja de Suplementos em Betim',
+  meta_title: 'A&E Total Mix | Tênis e Perfumes no Varejo e Atacado',
   meta_description:
-    'Loja de suplementos em Betim: whey protein, creatina, vitaminas e produtos fitness na Passarim Suplementos. Entrega rápida e compra segura.',
+    'A&E Total Mix: tênis, perfumes e muito mais no varejo e no atacado. Compre online com pagamento seguro e envio para todo o Brasil.',
 
-  trust_1_title: 'Produtos 100% originais',
-  trust_1_text: 'Qualidade garantida',
-  trust_2_title: 'Entrega rapida',
-  trust_2_text: 'Betim e todo o Brasil',
+  trust_1_title: 'Varejo e atacado',
+  trust_1_text: 'Compre uma unidade ou em quantidade',
+  trust_2_title: 'Envio para todo o Brasil',
+  trust_2_text: 'Frete calculado no carrinho',
   trust_3_title: 'Pagamento seguro',
-  trust_3_text: 'Ambiente 100% seguro',
-  trust_4_title: 'Atendimento especializado',
-  trust_4_text: 'Suporte via WhatsApp',
+  trust_3_text: 'Pix e cartão pelo Mercado Pago',
+  trust_4_title: 'Atendimento no WhatsApp',
+  trust_4_text: 'Tire dúvidas antes de comprar',
 
   benefit_pix_title: '10% OFF no Pix',
   benefit_pix_text: 'Desconto à vista em toda loja',
@@ -190,75 +173,101 @@ export const defaultSiteSettings: SiteSettings = {
   benefit_card_title: 'Parcele em até 12x',
   benefit_card_text: 'No cartão de crédito',
 
-  newsletter_title: 'Receba ofertas exclusivas',
-  newsletter_subtitle: 'Cadastre seu e-mail e ganhe 10% OFF na primeira compra.',
+  newsletter_title: 'Receba novidades',
+  newsletter_subtitle: 'Cadastre seu e-mail para saber de lançamentos e ofertas.',
 
-  footer_about:
-    'Passarim Suplementos em Betim: whey, creatina, vitaminas e produtos fitness com qualidade, ofertas e compra segura.',
+  footer_about: 'A&E Total Mix: tênis, perfumes e muito mais no varejo e no atacado.',
   footer_secure_text: 'Compra segura Mercado Pago',
 
   promo_banner_enabled: false,
-  promo_banner_text: 'Promoção especial: frete grátis + desconto no Pix!',
+  promo_banner_text: '',
 
   categories: [],
 }
 
-const legacyMetaTitles = new Set([
-  'Passarin Suplementos - Mais energia, foco e resultados',
-  'Passarim Suplementos | Suplementos e Produtos Fitness',
-])
+/**
+ * Valores da identidade anterior (Passarin/Fit Suplementos) que ainda podem estar salvos no banco.
+ * Quando encontrados, dao lugar aos padroes da A&E Total Mix. Valores personalizados pelo admin sao mantidos.
+ */
+const legacyBrandText = /passari[nm]|fit ?suplement|suplement|betim|whey|creatina/i
+const legacyColors = new Set(['#c4f000', '#b2dd00', '#0d0f12', '#dc2626'])
+const legacyImages = new Set(['/passarin-logo.png', '/hero-athlete.png'])
 
-const legacyMetaDescriptions = new Set([
-  'Suplementos de qualidade, ofertas, frete gratis e compra segura.',
-  'Encontre suplementos, whey protein, creatina, vitaminas e produtos fitness na Passarim Suplementos.',
-])
+const legacyTextDefaults: Partial<Record<keyof SiteSettings, string[]>> = {
+  store_tagline: ['Suplementos'],
+  topbar_text: ['Frete grátis para todo Brasil acima de R$199'],
+  hero_eyebrow: ['Supere seus limites'],
+  hero_title: ['Mais energia. Mais foco.'],
+  hero_title_highlight: ['Melhores resultados.'],
+  hero_cta_label: ['Compre agora'],
+  trust_1_title: ['Produtos 100% originais'],
+  trust_1_text: ['Qualidade garantida'],
+  trust_2_title: ['Entrega rapida'],
+  trust_2_text: ['Para todo o Brasil'],
+  trust_3_text: ['Ambiente 100% seguro'],
+  trust_4_title: ['Atendimento especializado'],
+  trust_4_text: ['Suporte via WhatsApp'],
+  newsletter_title: ['Receba ofertas exclusivas'],
+  newsletter_subtitle: ['Cadastre seu e-mail e ganhe 10% OFF na primeira compra.'],
+  promo_banner_text: ['Promoção especial: frete grátis + desconto no Pix!'],
+}
 
-const legacyHeroSubtitles = new Set([
-  'Os melhores suplementos com qualidade garantida para potencializar seu treino e transformar seu corpo.',
-])
-
-const legacyFooterAbout = new Set([
-  'Suplementos de qualidade, ofertas especiais e compra segura para todos os seus treinos.',
-])
+const brandTextKeys = [
+  'store_tagline',
+  'whatsapp_message',
+  'topbar_text',
+  'hero_eyebrow',
+  'hero_title',
+  'hero_title_highlight',
+  'hero_subtitle',
+  'hero_cta_label',
+  'meta_title',
+  'meta_description',
+  'trust_1_title',
+  'trust_1_text',
+  'trust_2_title',
+  'trust_2_text',
+  'trust_3_title',
+  'trust_3_text',
+  'trust_4_title',
+  'trust_4_text',
+  'newsletter_title',
+  'newsletter_subtitle',
+  'footer_about',
+  'promo_banner_text',
+] as const
 
 export function mergeSiteSettings(partial?: Partial<SiteSettings> | null): SiteSettings {
   const merged = { ...defaultSiteSettings, ...(partial ?? {}) }
-  const storedName = partial?.store_name?.trim().toLocaleLowerCase('pt-BR')
-  if (storedName === 'fit suplemento' || storedName === 'fit suplementos') {
-    merged.store_name = defaultSiteSettings.store_name
-    merged.store_name_short = defaultSiteSettings.store_name_short
-    merged.logo_url = defaultSiteSettings.logo_url
+  const d = defaultSiteSettings
+
+  const legacyStore = legacyBrandText.test(partial?.store_name ?? '') || legacyBrandText.test(partial?.store_name_short ?? '')
+  if (legacyStore) {
+    merged.store_name = d.store_name
+    merged.store_name_short = d.store_name_short
     merged.logo_enabled = true
-    merged.logo_show_text = defaultSiteSettings.logo_show_text
-    merged.logo_as_favicon = defaultSiteSettings.logo_as_favicon
-    merged.whatsapp_message = defaultSiteSettings.whatsapp_message
-    merged.meta_title = defaultSiteSettings.meta_title
+    merged.logo_show_text = d.logo_show_text
+    merged.logo_as_favicon = d.logo_as_favicon
   }
-  if (!partial?.meta_title?.trim() || legacyMetaTitles.has(partial.meta_title.trim())) {
-    merged.meta_title = defaultSiteSettings.meta_title
+  if (legacyStore || legacyImages.has(merged.logo_url?.trim())) merged.logo_url = d.logo_url
+  if (legacyStore || legacyImages.has(merged.hero_image_url?.trim()) || !merged.hero_image_url?.trim()) {
+    merged.hero_image_url = d.hero_image_url
   }
-  if (
-    !partial?.meta_description?.trim() ||
-    legacyMetaDescriptions.has(partial.meta_description.trim()) ||
-    !/betim/i.test(partial.meta_description)
-  ) {
-    merged.meta_description = defaultSiteSettings.meta_description
+
+  if (legacyColors.has(merged.color_brand?.toLowerCase())) merged.color_brand = d.color_brand
+  if (legacyColors.has(merged.color_brand_hover?.toLowerCase())) merged.color_brand_hover = d.color_brand_hover
+  if (legacyColors.has(merged.color_ink?.toLowerCase())) merged.color_ink = d.color_ink
+  if (legacyColors.has(merged.color_promo?.toLowerCase())) merged.color_promo = d.color_promo
+
+  for (const key of brandTextKeys) {
+    const value = partial?.[key]?.trim()
+    if (key === 'promo_banner_text') {
+      if (value && (legacyBrandText.test(value) || legacyTextDefaults[key]?.includes(value))) merged[key] = d[key]
+      continue
+    }
+    if (!value || legacyBrandText.test(value) || legacyTextDefaults[key]?.includes(value)) merged[key] = d[key]
   }
-  if (!partial?.hero_subtitle?.trim() || legacyHeroSubtitles.has(partial.hero_subtitle.trim())) {
-    merged.hero_subtitle = defaultSiteSettings.hero_subtitle
-  }
-  if (!partial?.hero_eyebrow?.trim() || partial.hero_eyebrow.trim() === 'Supere seus limites') {
-    merged.hero_eyebrow = defaultSiteSettings.hero_eyebrow
-  }
-  if (!partial?.footer_about?.trim() || legacyFooterAbout.has(partial.footer_about.trim())) {
-    merged.footer_about = defaultSiteSettings.footer_about
-  }
-  if (!partial?.store_tagline?.trim() || partial.store_tagline.trim() === 'Suplementos') {
-    merged.store_tagline = defaultSiteSettings.store_tagline
-  }
-  if (!partial?.trust_2_text?.trim() || partial.trust_2_text.trim() === 'Para todo o Brasil') {
-    merged.trust_2_text = defaultSiteSettings.trust_2_text
-  }
+
   if (!Array.isArray(merged.categories)) {
     merged.categories = []
   } else {

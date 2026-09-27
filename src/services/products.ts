@@ -56,6 +56,19 @@ export async function getAvailableProductCategories() {
   return [...new Set((data ?? []).map((product) => product.categoria?.trim()).filter(Boolean) as string[])]
 }
 
+/** Marcas reais dos produtos ativos (sem duplicadas, sem vazias, em ordem alfabetica). */
+export async function getAvailableProductBrands() {
+  const { data, error } = await supabase
+    .from('produtos')
+    .select('marca')
+    .eq('ativo', true)
+
+  if (error) throw error
+
+  const brands = (data ?? []).map((product) => product.marca?.trim()).filter(Boolean) as string[]
+  return [...new Set(brands)].sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }))
+}
+
 export async function getBestSellingProducts() {
   const { data: salesData, error: salesError } = await supabase.rpc('produtos_mais_vendidos', {
     p_limite: homeProductsLimit,
@@ -100,7 +113,7 @@ export async function getProductBySlug(slug: string) {
   const { data, error } = await supabase.from('produtos').select(withImages).eq('slug', slug).maybeSingle()
   if (error) throw error
   if (!data || !isListed(data as Product)) {
-    throw Object.assign(new Error('Produto nao encontrado'), { code: 'PGRST116' })
+    throw Object.assign(new Error('Produto não encontrado'), { code: 'PGRST116' })
   }
   return data as Product
 }

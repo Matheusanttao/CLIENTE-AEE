@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { X } from 'lucide-react'
+import { ArrowRight, X } from 'lucide-react'
 import {
   createContext,
   useCallback,
@@ -11,6 +11,7 @@ import {
   type ReactNode,
   type SelectHTMLAttributes,
 } from 'react'
+import { Link } from 'react-router-dom'
 import { cn } from '../utils/cn'
 
 export function Button({
@@ -21,16 +22,13 @@ export function Button({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200',
+        'inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-colors duration-200',
+        'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20',
         'disabled:cursor-not-allowed disabled:opacity-50',
-        variant === 'primary' &&
-          'bg-brand text-ink shadow-brand hover:bg-brand-hover hover:-translate-y-0.5 active:translate-y-0',
-        variant === 'secondary' &&
-          'border border-ink/15 bg-white text-ink hover:border-ink hover:-translate-y-0.5 active:translate-y-0',
-        variant === 'ghost' &&
-          'bg-transparent text-ink hover:bg-ink/5',
-        variant === 'danger' &&
-          'bg-red-600 text-white shadow-sm hover:bg-red-700 active:scale-[0.98]',
+        variant === 'primary' && 'bg-brand text-white shadow-sm hover:bg-brand-hover',
+        variant === 'secondary' && 'border border-line bg-white text-ink hover:border-[#d0d5dd] hover:bg-surface',
+        variant === 'ghost' && 'bg-transparent text-ink hover:bg-surface',
+        variant === 'danger' && 'bg-danger text-white shadow-sm hover:bg-[#b42318]',
         className,
       )}
       {...props}
@@ -42,7 +40,7 @@ export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElem
   return (
     <input
       className={cn(
-        'w-full rounded-xl border border-line bg-white px-4 py-3 text-sm text-ink outline-none transition placeholder:text-gray-400 focus:border-ink focus:ring-4 focus:ring-brand/20',
+        'w-full rounded-xl border border-line bg-white px-4 py-3 text-sm text-ink outline-none transition placeholder:text-muted/70 focus:border-brand focus:ring-4 focus:ring-brand/15',
         className,
       )}
       {...props}
@@ -54,7 +52,7 @@ export function Select({ className, ...props }: SelectHTMLAttributes<HTMLSelectE
   return (
     <select
       className={cn(
-        'w-full rounded-xl border border-line bg-white px-4 py-3 text-sm text-ink outline-none transition focus:border-ink focus:ring-4 focus:ring-brand/20',
+        'w-full rounded-xl border border-line bg-white px-4 py-3 text-sm text-ink outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/15',
         className,
       )}
       {...props}
@@ -66,10 +64,10 @@ export function Badge({ children, tone = 'neutral' }: { children: ReactNode; ton
   return (
     <span
       className={cn(
-        'inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide',
-        tone === 'neutral' && 'bg-ink/5 text-ink/70',
-        tone === 'success' && 'bg-brand-soft text-ink',
-        tone === 'promo' && 'bg-red-50 text-red-700',
+        'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold',
+        tone === 'neutral' && 'bg-surface text-muted',
+        tone === 'success' && 'bg-[#ecfdf3] text-[#067647]',
+        tone === 'promo' && 'bg-brand-soft text-brand-hover',
       )}
     >
       {children}
@@ -78,14 +76,48 @@ export function Badge({ children, tone = 'neutral' }: { children: ReactNode; ton
 }
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse rounded-2xl bg-ink/5', className)} />
+  return <div className={cn('animate-pulse rounded-2xl bg-surface', className)} />
 }
 
 export function EmptyState({ title, description }: { title: string; description: string }) {
   return (
-    <div className="rounded-2xl border border-dashed border-line bg-white p-10 text-center">
-      <h3 className="text-xl font-semibold text-black">{title}</h3>
-      <p className="mt-2 text-sm text-gray-500">{description}</p>
+    <div className="rounded-2xl border border-line bg-surface/60 px-6 py-12 text-center">
+      <h3 className="text-lg font-semibold text-ink">{title}</h3>
+      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted">{description}</p>
+    </div>
+  )
+}
+
+/** Cabecalho padrao das secoes da loja (titulo, descricao opcional e link "Ver todos"). */
+export function SectionHeader({
+  eyebrow,
+  title,
+  description,
+  action,
+  className,
+}: {
+  eyebrow?: string
+  title: string
+  description?: string
+  action?: { label: string; to: string }
+  className?: string
+}) {
+  return (
+    <div className={cn('flex flex-wrap items-end justify-between gap-x-6 gap-y-3', className)}>
+      <div className="min-w-0">
+        {eyebrow && <p className="text-sm font-semibold text-brand">{eyebrow}</p>}
+        <h2 className="mt-1 text-2xl font-bold tracking-tight text-ink sm:text-[1.75rem]">{title}</h2>
+        {description && <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-muted">{description}</p>}
+      </div>
+      {action && (
+        <Link
+          to={action.to}
+          className="group inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-brand transition hover:text-brand-hover"
+        >
+          {action.label}
+          <ArrowRight size={16} className="transition group-hover:translate-x-0.5" />
+        </Link>
+      )}
     </div>
   )
 }
@@ -116,7 +148,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/45 p-0 backdrop-blur-[2px] sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 p-0 sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
@@ -129,7 +161,7 @@ export function Modal({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex shrink-0 items-center justify-between gap-4 border-b border-line px-5 py-4 sm:px-6">
-          <h2 className="font-display text-lg font-bold tracking-tight text-ink sm:text-xl">{title}</h2>
+          <h2 className="text-lg font-bold tracking-tight text-ink sm:text-xl">{title}</h2>
           <button
             type="button"
             aria-label="Fechar modal"
@@ -164,11 +196,11 @@ export function Pagination({
       <Button variant="secondary" disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
         Anterior
       </Button>
-      <span className="text-sm text-gray-500">
-        Pagina {page} de {totalPages}
+      <span className="text-sm text-muted">
+        Página {page} de {totalPages}
       </span>
       <Button variant="secondary" disabled={page >= totalPages} onClick={() => onPageChange(page + 1)}>
-        Proxima
+        Próxima
       </Button>
     </div>
   )
@@ -197,13 +229,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="fixed right-4 top-4 z-[60] grid gap-3">
+      <div className="fixed inset-x-4 top-4 z-[60] grid justify-items-end gap-3 sm:left-auto">
         {toasts.map((toast) => (
           <div
             key={toast.id}
             className={cn(
-              'flex min-w-72 items-center justify-between gap-4 rounded-2xl px-4 py-3 text-sm font-medium shadow-soft',
-              toast.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white',
+              'flex w-full items-center justify-between gap-4 rounded-xl px-4 py-3 text-sm font-medium shadow-soft sm:w-auto sm:min-w-72',
+              toast.type === 'success' ? 'bg-ink text-white' : 'bg-danger text-white',
             )}
           >
             {toast.message}
@@ -268,37 +300,36 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
       {children}
       {state && (
         <div
-          className="fixed inset-0 z-[70] grid place-items-center bg-ink/50 p-4 backdrop-blur-[2px]"
+          className="fixed inset-0 z-[70] grid place-items-center bg-ink/40 p-4"
           role="dialog"
           aria-modal="true"
           onClick={() => close(false)}
         >
           <div
-            className="w-full max-w-md animate-float-up rounded-[1.5rem] border border-line bg-white p-6 shadow-soft"
+            className="w-full max-w-md animate-float-up rounded-2xl border border-line bg-white p-6 shadow-soft"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="font-display text-xl font-bold text-ink">{state.title}</h2>
+                <h2 className="text-lg font-bold text-ink">{state.title}</h2>
                 <p className="mt-2 text-sm leading-relaxed text-muted">{state.message}</p>
               </div>
               <button
                 type="button"
                 aria-label="Fechar"
-                className="rounded-full p-2 text-muted transition hover:bg-ink/5 hover:text-ink"
+                className="rounded-full p-2 text-muted transition hover:bg-surface hover:text-ink"
                 onClick={() => close(false)}
               >
                 <X size={18} />
               </button>
             </div>
             <div className="mt-6 flex flex-wrap justify-end gap-2">
-              <Button type="button" variant="secondary" className="rounded-2xl" onClick={() => close(false)}>
+              <Button type="button" variant="secondary" onClick={() => close(false)}>
                 {state.cancelLabel}
               </Button>
               <Button
                 type="button"
                 variant={state.tone === 'danger' ? 'danger' : 'primary'}
-                className="rounded-2xl"
                 onClick={() => close(true)}
               >
                 {state.confirmLabel}

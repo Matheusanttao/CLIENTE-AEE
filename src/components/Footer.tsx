@@ -1,50 +1,122 @@
+import { Mail, MessageCircle, ShieldCheck } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useSiteSettings } from '../contexts/SiteSettingsContext'
 import { StoreLogo } from './StoreLogo'
 
+const currentYear = new Date().getFullYear()
+
+const storeLinks = [
+  { label: 'Catálogo', to: '/catalogo' },
+  { label: 'Carrinho', to: '/carrinho' },
+  { label: 'Minha conta', to: '/minha-conta' },
+  { label: 'Promoções', to: '/catalogo?sort=price-asc' },
+  { label: 'Favoritos', to: '/minha-conta/favoritos' },
+]
+
+const institutionalLinks = [
+  { label: 'Política de privacidade', to: '/privacidade' },
+  { label: 'Termos de uso', to: '/termos' },
+  { label: 'Trocas e devoluções', to: '/trocas-devolucoes' },
+  { label: 'Rastrear pedido', to: '/rastrear-pedido' },
+]
+
+const linkClass =
+  'inline-flex min-h-10 items-center text-sm text-muted transition-colors hover:text-brand focus-visible:rounded-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/15 lg:min-h-9'
+
+function FooterColumn({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div>
+      <h3 className="text-sm font-semibold text-ink">{title}</h3>
+      <ul className="mt-3 grid gap-0.5">{children}</ul>
+    </div>
+  )
+}
+
 export function Footer() {
-  const { settings } = useSiteSettings()
+  const { settings, whatsappUrl } = useSiteSettings()
+  const supportEmail = settings.support_email?.trim()
+  const hasWhatsapp = Boolean(settings.whatsapp_number?.trim())
+  const secureText = settings.footer_secure_text?.trim()
 
   return (
-    <footer className="mt-16 bg-ink text-white">
-      <div className="container grid gap-10 py-16 md:grid-cols-4">
-        <div className="md:col-span-2">
-          <StoreLogo size="lg" />
-          <p className="mt-5 max-w-md leading-relaxed text-gray-400">{settings.footer_about}</p>
-          <p className="mt-3 text-sm font-medium text-brand">Loja de suplementos em Betim · MG</p>
-          <p className="mt-1 text-sm text-gray-500">Atendemos Betim e enviamos para todo o Brasil</p>
+    <footer className="mt-16 border-t border-line bg-white md:mt-24">
+      <div className="container grid gap-10 py-12 sm:grid-cols-2 md:py-16 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-12">
+        <div className="sm:col-span-2 lg:col-span-1">
+          <StoreLogo size="lg" className="w-fit" />
+          {settings.footer_about && (
+            <p className="mt-5 max-w-xs text-sm leading-relaxed text-muted">{settings.footer_about}</p>
+          )}
+          {settings.store_tagline && (
+            <p className="mt-4 inline-flex rounded-full bg-brand-mint px-3 py-1 text-xs font-semibold text-brand-hover">
+              {settings.store_tagline}
+            </p>
+          )}
         </div>
-        <div>
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-white">Loja</h3>
-          <div className="mt-4 grid gap-2.5 text-sm text-gray-400">
-            <Link to="/catalogo" className="transition hover:text-brand">Catálogo</Link>
-            <Link to="/carrinho" className="transition hover:text-brand">Carrinho</Link>
-            <Link to="/minha-conta" className="transition hover:text-brand">Minha conta</Link>
-            <Link to="/catalogo?sort=price-asc" className="text-brand transition hover:text-brand-hover">
-              Promoções
-            </Link>
-          </div>
-        </div>
-        <div>
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-white">Institucional</h3>
-          <div className="mt-4 grid gap-2.5 text-sm text-gray-400">
-            <Link to="/privacidade" className="transition hover:text-brand">Política de privacidade</Link>
-            <Link to="/termos" className="transition hover:text-brand">Termos de uso</Link>
-            <Link to="/trocas-devolucoes" className="transition hover:text-brand">Trocas e devoluções</Link>
-            <span>{settings.support_email}</span>
-            <span>{settings.footer_secure_text}</span>
-          </div>
-        </div>
+
+        <FooterColumn title="Loja">
+          {storeLinks.map((link) => (
+            <li key={link.to}>
+              <Link to={link.to} className={linkClass}>
+                {link.label}
+              </Link>
+            </li>
+          ))}
+        </FooterColumn>
+
+        <FooterColumn title="Institucional">
+          {institutionalLinks.map((link) => (
+            <li key={link.to}>
+              <Link to={link.to} className={linkClass}>
+                {link.label}
+              </Link>
+            </li>
+          ))}
+        </FooterColumn>
+
+        <FooterColumn title="Atendimento">
+          {supportEmail && (
+            <li>
+              <a href={`mailto:${supportEmail}`} className={`${linkClass} group min-w-0 gap-2.5`}>
+                <Mail size={16} className="shrink-0 text-muted transition-colors group-hover:text-brand" />
+                <span className="min-w-0 break-all">{supportEmail}</span>
+              </a>
+            </li>
+          )}
+          {hasWhatsapp && (
+            <li>
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${linkClass} group gap-2.5`}
+              >
+                <MessageCircle size={16} className="shrink-0 text-muted transition-colors group-hover:text-brand" />
+                Fale pelo WhatsApp
+              </a>
+            </li>
+          )}
+          {secureText && (
+            <li className="mt-3 flex items-start gap-2.5 rounded-xl bg-surface px-3 py-2.5 text-sm text-ink-soft">
+              <ShieldCheck size={16} className="mt-0.5 shrink-0 text-brand" />
+              <span>{secureText}</span>
+            </li>
+          )}
+        </FooterColumn>
       </div>
-      <div className="border-t border-white/10">
-        <div className="container flex flex-col items-center gap-2 py-6 text-center text-xs text-gray-500">
+
+      <div className="border-t border-line">
+        <div className="container flex flex-col gap-2 py-6 text-center text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:text-left">
           <p>
-            © {new Date().getFullYear()} {settings.store_name} · Desenvolvido por{' '}
+            © {currentYear} {settings.store_name}. Todos os direitos reservados.
+          </p>
+          <p>
+            Desenvolvido por{' '}
             <a
               href="https://matheusantao.com.br"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-bold text-brand transition hover:text-brand-hover hover:underline"
+              className="font-semibold text-ink-soft transition-colors hover:text-brand"
             >
               Matheus Antão
             </a>

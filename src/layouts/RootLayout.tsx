@@ -19,17 +19,17 @@ function ScrollToTop() {
 
 export function RootLayout() {
   return (
-    <>
+    <div className="flex min-h-dvh flex-col bg-white">
       <ScrollToTop />
       <DemoModeBanner />
       <Header />
-      <main>
+      <main className="flex-1">
         <Suspense fallback={<PageSpinner />}>
           <Outlet />
         </Suspense>
       </main>
       <Footer />
       {!isStoreDemoMode && <WhatsAppButton />}
-    </>
+    </div>
   )
 }

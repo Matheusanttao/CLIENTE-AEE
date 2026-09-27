@@ -1,11 +1,20 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { CheckCircle2, ImagePlus, Loader2, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
+import { CheckCircle2, ImagePlus, Loader2, Package, Pencil, Plus, RotateCcw, Search, Trash2, X } from 'lucide-react'
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import { flushSync } from 'react-dom'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { AdminCard, AdminListRow, AdminSectionHeader } from '../components/admin/AdminUI'
+import {
+  AdminCard,
+  AdminEmptyState,
+  AdminField,
+  AdminFormSection,
+  AdminListRow,
+  AdminPill,
+  AdminSectionHeader,
+} from '../components/admin/AdminUI'
+import { adminButtonClass, adminTextareaClass } from '../components/admin/adminStyles'
 import { MaskedInput } from '../components/MaskedInput'
-import { Button, Input, Modal, Select, Skeleton, useConfirm, useToast } from '../components/ui'
+import { Button, Input, Modal, Select, useConfirm, useToast } from '../components/ui'
 import { useAuth } from '../contexts/AuthContext'
 import { useSiteSettings } from '../contexts/SiteSettingsContext'
 import { CORREIOS_MAX_WEIGHT_KG } from '../lib/constants'
@@ -15,6 +24,8 @@ import { deleteProduct, reactivateProduct, updateProduct } from '../services/adm
 import { uploadToCloudinary } from '../services/cloudinary'
 import { getFlavorsByProduct, replaceProductFlavors } from '../services/flavors'
 import type { Product, ProductCategory, ProductImage } from '../types'
+import { cn } from '../utils/cn'
+import { formatCurrency } from '../utils/format'
 import { slugify } from '../utils/slug'
 
 type FlavorDraft = { nome: string; estoque: number }
@@ -76,7 +87,7 @@ const parseOptionalNumber = (value: FormDataEntryValue | null) => {
 
 const parseRequiredNumber = (value: FormDataEntryValue | null, label: string) => {
   const parsed = parseOptionalNumber(value)
-  if (parsed == null || parsed < 0) throw new Error(`Informe um valor valido para ${label}`)
+  if (parsed == null || parsed < 0) throw new Error(`Informe um valor válido para ${label}`)
   return parsed
 }
 
@@ -88,7 +99,7 @@ function productSaveErrorMessage(error: unknown, fallback: string) {
   const message = details?.message ?? (error instanceof Error ? error.message : '')
 
   if (details?.code === '23505' || message.includes('produtos_slug_key')) {
-    return 'Já existe um produto com esse nome. Para diferenciar, inclua no nome o peso, tamanho ou sabor. Exemplo: Creatina 300g.'
+    return 'Já existe um produto com esse nome. Para diferenciar, inclua no nome o modelo, a cor ou o volume. Exemplo: Tênis Casual Branco ou Perfume Amber 100 ml.'
   }
 
   return message || fallback
@@ -204,8 +215,8 @@ export function AdminProductsPage() {
         ? flavors.reduce((sum, flavor) => sum + Math.max(0, Number(flavor.estoque) || 0), 0)
         : parseRequiredNumber(formData.get('estoque'), 'estoque')
 
-      const preco = parseRequiredNumber(formData.get('preco'), 'preco')
-      if (preco <= 0) throw new Error('Informe um preco valido')
+      const preco = parseRequiredNumber(formData.get('preco'), 'preço')
+      if (preco <= 0) throw new Error('Informe um preço válido')
 
       const pesoKg = parseRequiredNumber(formData.get('peso_kg'), 'peso')
       const alturaCm = parseRequiredNumber(formData.get('altura_cm'), 'altura')
@@ -215,7 +226,7 @@ export function AdminProductsPage() {
         throw new Error('Peso e medidas precisam ser maiores que zero')
       }
       if (pesoKg > CORREIOS_MAX_WEIGHT_KG) {
-        throw new Error(`Peso maximo permitido pelos Correios: ${CORREIOS_MAX_WEIGHT_KG} kg`)
+        throw new Error(`Peso máximo permitido pelos Correios: ${CORREIOS_MAX_WEIGHT_KG} kg`)
       }
 
       const productPayload = {
@@ -257,7 +268,7 @@ export function AdminProductsPage() {
       }
 
       if (flavors.length > 0) {
-        setSaveStatus('Salvando sabores...')
+        setSaveStatus('Salvando variações...')
         await replaceProductFlavors(product.id, flavors)
       }
 
@@ -289,7 +300,7 @@ export function AdminProductsPage() {
       notify('Produto cadastrado')
       setSuccessModal({
         title: 'Produto cadastrado',
-        message: `"${nome}" foi inserido no catalogo com sucesso.`,
+        message: `"${nome}" foi cadastrado no catálogo com sucesso.`,
       })
       navigate('/admin/produtos')
     } catch (error) {
@@ -302,7 +313,7 @@ export function AdminProductsPage() {
   const handleDelete = async (product: Product) => {
     const ok = await confirm({
       title: 'Remover produto',
-      message: `Se "${product.nome}" nunca foi vendido, sera excluido. Se ja entrou em algum pedido, sera apenas ocultado da loja (o historico permanece).`,
+      message: `Se "${product.nome}" nunca foi vendido, será excluído. Se já entrou em algum pedido, será apenas ocultado da loja (o histórico permanece).`,
       confirmLabel: 'Remover',
       tone: 'danger',
     })
@@ -311,8 +322,8 @@ export function AdminProductsPage() {
       const result = await deleteProduct(product.id)
       notify(
         result.mode === 'deleted'
-          ? 'Produto excluido'
-          : 'Produto ocultado da loja (ja havia vendas vinculadas)',
+          ? 'Produto excluído'
+          : 'Produto ocultado da loja (já havia vendas vinculadas)',
       )
       await queryClient.invalidateQueries({ queryKey: ['admin-products'] })
     } catch (error) {
@@ -342,8 +353,8 @@ export function AdminProductsPage() {
         ? flavors.reduce((sum, flavor) => sum + Math.max(0, Number(flavor.estoque) || 0), 0)
         : parseRequiredNumber(formData.get('estoque'), 'estoque')
 
-      const preco = parseRequiredNumber(formData.get('preco'), 'preco')
-      if (preco <= 0) throw new Error('Informe um preco valido')
+      const preco = parseRequiredNumber(formData.get('preco'), 'preço')
+      if (preco <= 0) throw new Error('Informe um preço válido')
 
       const pesoKg = parseRequiredNumber(formData.get('peso_kg'), 'peso')
       const alturaCm = parseRequiredNumber(formData.get('altura_cm'), 'altura')
@@ -353,7 +364,7 @@ export function AdminProductsPage() {
         throw new Error('Peso e medidas precisam ser maiores que zero')
       }
       if (pesoKg > CORREIOS_MAX_WEIGHT_KG) {
-        throw new Error(`Peso maximo permitido pelos Correios: ${CORREIOS_MAX_WEIGHT_KG} kg`)
+        throw new Error(`Peso máximo permitido pelos Correios: ${CORREIOS_MAX_WEIGHT_KG} kg`)
       }
 
       await updateProduct(editing.id, {
@@ -370,7 +381,7 @@ export function AdminProductsPage() {
         comprimento_cm: comprimentoCm,
         destaque: formData.get('destaque') === 'on',
       })
-      setSaveStatus('Salvando sabores...')
+      setSaveStatus('Salvando variações...')
       await replaceProductFlavors(editing.id, flavors)
 
       const originalIds = new Set((editing.imagens_produtos ?? []).map((image) => image.id))
@@ -453,15 +464,40 @@ export function AdminProductsPage() {
     void handleEdit(new FormData(event.currentTarget))
   }
 
+  const closeEditModal = () => {
+    setEditing(null)
+    setEditFlavors([])
+    setEditImageFiles([])
+    setEditExistingImages([])
+    setEditCoverSource('existing')
+  }
+
+  const categoryOptions =
+    categories.length === 0 ? (
+      <option value="">Cadastre categorias em Configurações</option>
+    ) : (
+      categories.map((category) => <option key={category}>{category}</option>)
+    )
+
+  const categoryHint =
+    categories.length === 0 ? (
+      <>
+        Nenhuma categoria cadastrada.{' '}
+        <Link to="/admin/configuracoes" className="font-semibold text-brand hover:text-brand-hover">
+          Criar em Configurações
+        </Link>
+      </>
+    ) : undefined
+
   return (
-    <div className="relative grid gap-3">
+    <div className="relative grid gap-4 sm:gap-5">
       {(uploading || savingEdit) && (
-        <div className="fixed inset-0 z-[80] grid place-items-center bg-ink/45 p-4 backdrop-blur-[2px]">
-          <div className="flex w-full max-w-sm flex-col items-center gap-4 rounded-3xl bg-white px-6 py-8 text-center shadow-soft">
+        <div className="fixed inset-0 z-[80] grid place-items-center bg-ink/40 p-4">
+          <div className="flex w-full max-w-sm flex-col items-center gap-4 rounded-2xl border border-line bg-white px-6 py-8 text-center shadow-soft">
             <Loader2 className="h-10 w-10 animate-spin text-brand" />
             <div>
-              <p className="font-display text-lg font-bold text-ink">
-                {uploading ? 'Publicando produto' : 'Salvando alteracoes'}
+              <p className="text-lg font-semibold text-ink">
+                {uploading ? 'Publicando produto' : 'Salvando alterações'}
               </p>
               <p className="mt-1 text-sm text-muted">
                 {saveStatus || 'Aguarde, isso pode levar alguns segundos...'}
@@ -472,138 +508,186 @@ export function AdminProductsPage() {
       )}
 
       {isCreateMode ? (
-        <AdminCard>
-          <AdminSectionHeader title="Cadastrar produto" description="Adicione um item ao catalogo" />
-          <form
-            ref={createFormRef}
-            key={createFormKey}
-            onSubmit={onCreateSubmit}
-            onChange={(event) => saveCreateDraft(event.currentTarget)}
-            className="grid gap-3 md:grid-cols-2"
-          >
-            <Input name="nome" placeholder="Nome do produto" defaultValue={createDraft?.nome} required />
-            <Input name="marca" placeholder="Marca" defaultValue={createDraft?.marca} required />
-            <Select
-              name="categoria"
-              defaultValue={createDraft?.categoria}
-              required
-              disabled={categories.length === 0}
+        <form
+          ref={createFormRef}
+          key={createFormKey}
+          onSubmit={onCreateSubmit}
+          onChange={(event) => saveCreateDraft(event.currentTarget)}
+          className="grid items-start gap-4 sm:gap-5 xl:grid-cols-[minmax(0,1fr)_360px]"
+        >
+          <div className="grid min-w-0 gap-4 sm:gap-5">
+            <AdminFormSection
+              title="Informações básicas"
+              description="Nome, marca, categoria e descrição exibidos na loja."
+              className="shadow-card"
             >
-              {categories.length === 0 ? (
-                <option value="">Cadastre categorias em Configuracoes</option>
-              ) : (
-                categories.map((category) => (
-                  <option key={category}>{category}</option>
-                ))
-              )}
-            </Select>
-            <MaskedInput
-              name="estoque"
-              mask="integer"
-              label="Estoque"
-              placeholder="0"
-              defaultValue={createDraft?.estoque ?? 0}
-              required={createFlavors.length === 0}
-              disabled={createFlavors.length > 0}
-            />
-            <MaskedInput
-              name="preco"
-              mask="currency"
-              label="Preco"
-              placeholder="R$ 0,00"
-              defaultValue={createDraft?.preco}
-              required
-            />
-            <MaskedInput
-              name="preco_promocional"
-              mask="currency"
-              label="Preco promocional"
-              placeholder="R$ 0,00"
-              defaultValue={createDraft?.preco_promocional}
-              optional
-            />
-            <MaskedInput
-              name="peso_kg"
-              mask="kg"
-              label={`Peso (max. ${CORREIOS_MAX_WEIGHT_KG} kg)`}
-              placeholder={`ate ${CORREIOS_MAX_WEIGHT_KG},000 kg`}
-              defaultValue={createDraft?.peso_kg}
-              required
-            />
-            <MaskedInput
-              name="altura_cm"
-              mask="cm"
-              label="Altura"
-              placeholder="0,0 cm"
-              defaultValue={createDraft?.altura_cm}
-              required
-            />
-            <MaskedInput
-              name="largura_cm"
-              mask="cm"
-              label="Largura"
-              placeholder="0,0 cm"
-              defaultValue={createDraft?.largura_cm}
-              required
-            />
-            <MaskedInput
-              name="comprimento_cm"
-              mask="cm"
-              label="Comprimento"
-              placeholder="0,0 cm"
-              defaultValue={createDraft?.comprimento_cm}
-              required
-            />
-            <label className="grid gap-2 md:col-span-2">
-              <span className="text-sm font-semibold text-ink">Descrição do produto (opcional)</span>
-              <textarea
-                name="descricao"
-                className="min-h-36 rounded-2xl border border-line bg-white p-4 outline-none transition placeholder:text-gray-400 focus:border-ink focus:ring-4 focus:ring-brand/20"
-                placeholder="Escreva benefícios, modo de uso, ingredientes e outras informações importantes. Você pode usar várias linhas."
-                defaultValue={createDraft?.descricao}
-              />
-              <span className="text-xs text-muted">Este conteúdo será exibido na página do produto.</span>
-            </label>
+              <div className="grid gap-4 md:grid-cols-2">
+                <AdminField label="Nome do produto" required className="md:col-span-2">
+                  <Input
+                    name="nome"
+                    placeholder="Ex.: Tênis Casual Branco"
+                    defaultValue={createDraft?.nome}
+                    required
+                  />
+                </AdminField>
+                <AdminField label="Marca" required>
+                  <Input name="marca" placeholder="Ex.: Nome da marca" defaultValue={createDraft?.marca} required />
+                </AdminField>
+                <AdminField label="Categoria" required hint={categoryHint}>
+                  <Select
+                    name="categoria"
+                    defaultValue={createDraft?.categoria}
+                    required
+                    disabled={categories.length === 0}
+                  >
+                    {categoryOptions}
+                  </Select>
+                </AdminField>
+                <AdminField
+                  label="Descrição do produto"
+                  optional
+                  className="md:col-span-2"
+                  hint="Este conteúdo será exibido na página do produto."
+                >
+                  <textarea
+                    name="descricao"
+                    className={cn(adminTextareaClass, 'min-h-40')}
+                    placeholder="Descreva materiais, numeração, notas olfativas, cuidados e outras informações importantes. Você pode usar várias linhas."
+                    defaultValue={createDraft?.descricao}
+                  />
+                </AdminField>
+              </div>
+            </AdminFormSection>
 
-            <div className="rounded-2xl border border-dashed border-line bg-[#fafaf8] p-4 md:col-span-2">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <h3 className="font-semibold text-ink">Sabores (opcional)</h3>
-                  <p className="text-xs text-muted">Se cadastrar sabores, o cliente precisa escolher um na compra.</p>
-                </div>
-                <Button
+            <ProductImagesField
+              label="Fotos do produto"
+              hint="Selecione várias imagens e escolha qual será a capa do catálogo."
+              className="shadow-card"
+              files={createImageFiles}
+              onFilesChange={handleCreateImagesChange}
+              coverSource="new"
+              onSetFileCover={(index) => {
+                const next = [...createImageFiles]
+                const [cover] = next.splice(index, 1)
+                handleCreateImagesChange([cover, ...next])
+              }}
+            />
+
+            <AdminFormSection
+              title="Variações (tamanho, cor, volume...)"
+              description="Opcional. Com variações, o cliente escolhe uma na compra e o estoque passa a ser a soma delas."
+              className="shadow-card"
+              action={
+                <button
                   type="button"
-                  variant="secondary"
+                  className={adminButtonClass('secondary', 'sm')}
                   onClick={() => setCreateFlavors((current) => [...current, { nome: '', estoque: 0 }])}
                 >
-                  <Plus size={16} /> Adicionar sabor
-                </Button>
-              </div>
+                  <Plus size={16} /> Adicionar variação
+                </button>
+              }
+            >
               <FlavorEditor flavors={createFlavors} onChange={setCreateFlavors} />
-            </div>
+            </AdminFormSection>
+          </div>
 
-            <div className="md:col-span-2">
-              <ProductImagesField
-                label="Fotos do produto"
-                hint="Selecione varias imagens e escolha qual sera a capa do catalogo."
-                files={createImageFiles}
-                onFilesChange={handleCreateImagesChange}
-                coverSource="new"
-                onSetFileCover={(index) => {
-                  const next = [...createImageFiles]
-                  const [cover] = next.splice(index, 1)
-                  handleCreateImagesChange([cover, ...next])
-                }}
-              />
-            </div>
-            <label className="flex items-center gap-2 text-sm font-semibold">
-              <input name="destaque" type="checkbox" defaultChecked={createDraft?.destaque} /> Produto em destaque
-            </label>
-            <div className="flex flex-wrap justify-end gap-2 md:col-span-2">
+          <div className="grid min-w-0 gap-4 sm:gap-5">
+            <AdminFormSection title="Preço e estoque" className="shadow-card">
+              <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-1">
+                <AdminField label="Preço" required>
+                  <MaskedInput
+                    name="preco"
+                    mask="currency"
+                    placeholder="R$ 0,00"
+                    defaultValue={createDraft?.preco}
+                    required
+                  />
+                </AdminField>
+                <AdminField label="Preço promocional" optional>
+                  <MaskedInput
+                    name="preco_promocional"
+                    mask="currency"
+                    placeholder="R$ 0,00"
+                    defaultValue={createDraft?.preco_promocional}
+                    optional
+                  />
+                </AdminField>
+                <AdminField
+                  label="Estoque"
+                  required={createFlavors.length === 0}
+                  hint={createFlavors.length > 0 ? 'Calculado pela soma das variações.' : undefined}
+                >
+                  <MaskedInput
+                    name="estoque"
+                    mask="integer"
+                    placeholder="0"
+                    defaultValue={createDraft?.estoque ?? 0}
+                    required={createFlavors.length === 0}
+                    disabled={createFlavors.length > 0}
+                  />
+                </AdminField>
+              </div>
+            </AdminFormSection>
+
+            <AdminFormSection
+              title="Envio"
+              description="Peso e medidas da embalagem, usados no cálculo do frete."
+              className="shadow-card"
+            >
+              <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 xl:grid-cols-2">
+                <AdminField label={`Peso (máx. ${CORREIOS_MAX_WEIGHT_KG} kg)`} required className="col-span-2 lg:col-span-1 xl:col-span-2">
+                  <MaskedInput
+                    name="peso_kg"
+                    mask="kg"
+                    placeholder={`até ${CORREIOS_MAX_WEIGHT_KG},000 kg`}
+                    defaultValue={createDraft?.peso_kg}
+                    required
+                  />
+                </AdminField>
+                <AdminField label="Altura" required>
+                  <MaskedInput
+                    name="altura_cm"
+                    mask="cm"
+                    placeholder="0,0 cm"
+                    defaultValue={createDraft?.altura_cm}
+                    required
+                  />
+                </AdminField>
+                <AdminField label="Largura" required>
+                  <MaskedInput
+                    name="largura_cm"
+                    mask="cm"
+                    placeholder="0,0 cm"
+                    defaultValue={createDraft?.largura_cm}
+                    required
+                  />
+                </AdminField>
+                <AdminField label="Comprimento" required className="col-span-2 lg:col-span-1 xl:col-span-2">
+                  <MaskedInput
+                    name="comprimento_cm"
+                    mask="cm"
+                    placeholder="0,0 cm"
+                    defaultValue={createDraft?.comprimento_cm}
+                    required
+                  />
+                </AdminField>
+              </div>
+            </AdminFormSection>
+
+            <AdminFormSection title="Visibilidade" className="shadow-card">
+              <FeaturedCheckbox defaultChecked={createDraft?.destaque} />
+            </AdminFormSection>
+          </div>
+
+          <div className="sticky bottom-3 z-20 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-white/95 px-4 py-3 shadow-soft backdrop-blur xl:col-span-2">
+            <p className="hidden text-sm text-muted sm:block">
+              Os campos ficam salvos como rascunho neste navegador enquanto você preenche.
+            </p>
+            <div className="flex w-full gap-2 sm:ml-auto sm:w-auto">
               <Button
                 type="button"
                 variant="secondary"
-                className="rounded-2xl"
+                className="flex-1 sm:flex-none"
                 onClick={() => {
                   discardCreateDraft()
                   navigate('/admin/produtos')
@@ -611,7 +695,7 @@ export function AdminProductsPage() {
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={uploading} className="rounded-2xl">
+              <Button type="submit" disabled={uploading} className="flex-1 sm:flex-none">
                 {uploading ? (
                   <>
                     <Loader2 size={16} className="animate-spin" />
@@ -622,49 +706,57 @@ export function AdminProductsPage() {
                 )}
               </Button>
             </div>
-          </form>
-        </AdminCard>
+          </div>
+        </form>
       ) : (
         <AdminCard>
           <AdminSectionHeader
-            title="Gestao de produtos"
-            description="Edite ou remova itens do catalogo"
+            title="Catálogo"
+            description={
+              products.length > 0
+                ? `${products.length} ${products.length === 1 ? 'produto cadastrado' : 'produtos cadastrados'}`
+                : 'Edite, oculte ou remova itens do catálogo.'
+            }
             action={
-              <Link
-                to="/admin/produtos/novo"
-                className="inline-flex shrink-0 items-center gap-2 rounded-2xl bg-brand px-4 py-2.5 text-sm font-bold text-ink shadow-brand transition hover:brightness-95"
-              >
+              <Link to="/admin/produtos/novo" className={adminButtonClass('primary', 'md')}>
                 <Plus size={16} />
                 Novo produto
               </Link>
             }
           />
           {!isLoading && !productsFailed && products.length > 0 && (
-            <label className="relative mb-3 block">
+            <label className="relative mb-4 block">
+              <span className="sr-only">Pesquisar produtos</span>
               <Search
-                size={17}
-                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
+                size={18}
+                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted"
               />
-              <Input
+              <input
                 type="search"
                 value={productSearch}
                 onChange={(event) => setProductSearch(event.target.value)}
                 placeholder="Pesquisar por nome, marca ou categoria"
-                className="pl-10"
+                className="w-full rounded-xl border border-transparent bg-surface py-3 pl-11 pr-4 text-sm text-ink outline-none transition placeholder:text-muted focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/15"
               />
             </label>
           )}
-          {isLoading && <Skeleton className="h-40 rounded-2xl" />}
+          {isLoading && (
+            <div className="grid gap-2.5">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="h-[88px] animate-pulse rounded-xl bg-surface" />
+              ))}
+            </div>
+          )}
           {productsFailed && !isLoading && (
-            <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-5 text-center">
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-6 text-center">
               <p className="text-sm font-semibold text-red-800">Não foi possível carregar os produtos.</p>
-              <p className="mt-1 text-xs text-red-700">
+              <p className="mt-1 text-sm text-red-700">
                 {productsError instanceof Error ? productsError.message : 'Verifique a conexão e tente novamente.'}
               </p>
               <Button
                 type="button"
                 variant="secondary"
-                className="mt-3"
+                className="mt-4"
                 disabled={isFetching}
                 onClick={() => void refetch()}
               >
@@ -674,54 +766,110 @@ export function AdminProductsPage() {
             </div>
           )}
           {!isLoading && !productsFailed && products.length === 0 && (
-            <p className="rounded-2xl border border-dashed border-line bg-[#fafaf8] px-4 py-8 text-center text-sm text-muted">
-              Nenhum produto cadastrado.{' '}
-              <Link to="/admin/produtos/novo" className="font-semibold text-ink underline">
-                Criar o primeiro
-              </Link>
-            </p>
+            <AdminEmptyState
+              icon={<Package size={20} />}
+              title="Nenhum produto cadastrado"
+              description="Cadastre tênis, perfumes e outros itens para exibir na loja."
+              action={
+                <Link to="/admin/produtos/novo" className={adminButtonClass('primary', 'sm')}>
+                  <Plus size={16} />
+                  Criar o primeiro
+                </Link>
+              }
+            />
           )}
           {!isLoading && !productsFailed && products.length > 0 && filteredProducts.length === 0 && (
-            <p className="rounded-2xl border border-dashed border-line bg-[#fafaf8] px-4 py-8 text-center text-sm text-muted">
-              Nenhum produto encontrado para “{productSearch}”.
-            </p>
+            <AdminEmptyState
+              icon={<Search size={20} />}
+              title={`Nenhum produto encontrado para “${productSearch}”`}
+              description="Tente outro nome, marca ou categoria."
+            />
           )}
           <div className="grid gap-2.5">
             {filteredProducts.map((product) => {
               const inactive = product.ativo === false
+              const cover = [...(product.imagens_produtos ?? [])].sort((a, b) => a.ordem - b.ordem)[0]
+              const variations = product.produto_sabores?.length ?? 0
+              const hasPromo =
+                product.preco_promocional != null &&
+                Number(product.preco_promocional) > 0 &&
+                Number(product.preco_promocional) < Number(product.preco)
               return (
                 <AdminListRow
                   key={product.id}
-                  className="text-sm md:grid-cols-[1fr_auto_auto] md:items-center"
+                  muted={inactive}
+                  className="sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
                 >
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <strong className="text-ink">{product.nome}</strong>
-                      {inactive && (
-                        <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-zinc-600">
-                          Oculto
-                        </span>
+                  <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                    <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl bg-sand-soft">
+                      {cover ? (
+                        <img
+                          src={optimizeCloudinaryUrl(cover.url, 160)}
+                          alt={cover.alt ?? product.nome}
+                          loading="lazy"
+                          className={cn('h-full w-full object-cover', inactive && 'opacity-60')}
+                        />
+                      ) : (
+                        <Package size={20} className="text-muted" aria-hidden />
                       )}
                     </div>
-                    <p className="text-muted">
-                      Estoque: {product.estoque} · {product.categoria}
-                      {(product.produto_sabores?.length ?? 0) > 0
-                        ? ` · ${product.produto_sabores?.length} sabores`
-                        : ''}
-                    </p>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <strong className="min-w-0 truncate text-sm font-semibold text-ink sm:text-[15px]">
+                          {product.nome}
+                        </strong>
+                        {inactive && <AdminPill>Oculto</AdminPill>}
+                        {product.destaque && !inactive && <AdminPill tone="brand">Destaque</AdminPill>}
+                      </div>
+                      <p className="mt-0.5 truncate text-sm text-muted">
+                        {[product.marca, product.categoria].filter(Boolean).join(' · ')}
+                      </p>
+                      <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm">
+                        <span className="font-semibold tabular-nums text-ink">
+                          {formatCurrency(hasPromo ? Number(product.preco_promocional) : Number(product.preco))}
+                        </span>
+                        {hasPromo && (
+                          <span className="tabular-nums text-muted line-through">
+                            {formatCurrency(Number(product.preco))}
+                          </span>
+                        )}
+                        <span className={product.estoque <= 5 ? 'font-medium text-amber-700' : 'text-muted'}>
+                          Estoque: {product.estoque}
+                        </span>
+                        {variations > 0 && (
+                          <span className="text-muted">
+                            {variations} {variations === 1 ? 'variação' : 'variações'}
+                          </span>
+                        )}
+                      </p>
+                    </div>
                   </div>
-                  <Button variant="secondary" onClick={() => void openEdit(product)}>
-                    <Pencil size={16} /> Editar
-                  </Button>
-                  {inactive ? (
-                    <Button variant="secondary" onClick={() => void handleReactivate(product)}>
-                      Reativar
-                    </Button>
-                  ) : (
-                    <Button variant="danger" onClick={() => void handleDelete(product)}>
-                      <Trash2 size={16} /> Remover
-                    </Button>
-                  )}
+                  <div className="flex gap-2 sm:justify-end">
+                    <button
+                      type="button"
+                      className={adminButtonClass('secondary', 'sm', 'flex-1 sm:flex-none')}
+                      onClick={() => void openEdit(product)}
+                    >
+                      <Pencil size={15} /> Editar
+                    </button>
+                    {inactive ? (
+                      <button
+                        type="button"
+                        className={adminButtonClass('secondary', 'sm', 'flex-1 sm:flex-none')}
+                        onClick={() => void handleReactivate(product)}
+                      >
+                        <RotateCcw size={15} /> Reativar
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className={adminButtonClass('danger', 'sm', 'flex-1 sm:flex-none')}
+                        onClick={() => void handleDelete(product)}
+                      >
+                        <Trash2 size={15} /> Remover
+                      </button>
+                    )}
+                  </div>
                 </AdminListRow>
               )
             })}
@@ -729,90 +877,51 @@ export function AdminProductsPage() {
         </AdminCard>
       )}
 
-      <Modal
-        open={Boolean(editing)}
-        title="Editar produto"
-        size="xl"
-        onClose={() => {
-          setEditing(null)
-          setEditFlavors([])
-          setEditImageFiles([])
-          setEditExistingImages([])
-          setEditCoverSource('existing')
-        }}
-      >
+      <Modal open={Boolean(editing)} title="Editar produto" size="xl" onClose={closeEditModal}>
         {editing && (
-          <form key={editing.id} onSubmit={onEditSubmit} className="grid gap-3 md:grid-cols-2">
-            <Input name="nome" placeholder="Nome do produto" defaultValue={editing.nome} required />
-            <Input name="marca" placeholder="Marca" defaultValue={editing.marca} required />
-            <Select name="categoria" defaultValue={editing.categoria} required disabled={categories.length === 0}>
-              {categories.length === 0 ? (
-                <option value="">Cadastre categorias em Configuracoes</option>
-              ) : (
-                categories.map((category) => (
-                  <option key={category}>{category}</option>
-                ))
-              )}
-            </Select>
-            <MaskedInput
-              name="estoque"
-              mask="integer"
-              label="Estoque"
-              defaultValue={editing.estoque}
-              required={editFlavors.length === 0}
-              disabled={editFlavors.length > 0}
-            />
-            <MaskedInput name="preco" mask="currency" label="Preco" defaultValue={editing.preco} required />
-            <MaskedInput
-              name="preco_promocional"
-              mask="currency"
-              label="Preco promocional"
-              defaultValue={editing.preco_promocional}
-              optional
-            />
-            <MaskedInput
-              name="peso_kg"
-              mask="kg"
-              label={`Peso (max. ${CORREIOS_MAX_WEIGHT_KG} kg)`}
-              defaultValue={editing.peso_kg}
-              required
-            />
-            <MaskedInput name="altura_cm" mask="cm" label="Altura" defaultValue={editing.altura_cm} required />
-            <MaskedInput name="largura_cm" mask="cm" label="Largura" defaultValue={editing.largura_cm} required />
-            <MaskedInput
-              name="comprimento_cm"
-              mask="cm"
-              label="Comprimento"
-              defaultValue={editing.comprimento_cm}
-              required
-            />
-            <label className="grid gap-2 md:col-span-2">
-              <span className="text-sm font-semibold text-ink">Descrição do produto (opcional)</span>
-              <textarea
-                name="descricao"
-                className="min-h-36 rounded-2xl border border-line bg-white p-4 outline-none transition focus:border-ink focus:ring-4 focus:ring-brand/20"
-                placeholder="Escreva benefícios, modo de uso, ingredientes e outras informações importantes."
-                defaultValue={editing.descricao}
-              />
-              <span className="text-xs text-muted">Este conteúdo será exibido na página do produto.</span>
-            </label>
-            <div className="rounded-2xl border border-dashed border-line bg-[#fafaf8] p-4 md:col-span-2">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 className="font-semibold text-ink">Sabores</h3>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setEditFlavors((current) => [...current, { nome: '', estoque: 0 }])}
-                >
-                  <Plus size={16} /> Adicionar sabor
-                </Button>
-              </div>
-              <FlavorEditor flavors={editFlavors} onChange={setEditFlavors} />
-            </div>
-            <div className="md:col-span-2">
+          <form
+            key={editing.id}
+            onSubmit={onEditSubmit}
+            className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px]"
+          >
+            <div className="grid min-w-0 gap-4">
+              <AdminFormSection title="Informações básicas">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <AdminField label="Nome do produto" required className="md:col-span-2">
+                    <Input name="nome" placeholder="Nome do produto" defaultValue={editing.nome} required />
+                  </AdminField>
+                  <AdminField label="Marca" required>
+                    <Input name="marca" placeholder="Marca" defaultValue={editing.marca} required />
+                  </AdminField>
+                  <AdminField label="Categoria" required hint={categoryHint}>
+                    <Select
+                      name="categoria"
+                      defaultValue={editing.categoria}
+                      required
+                      disabled={categories.length === 0}
+                    >
+                      {categoryOptions}
+                    </Select>
+                  </AdminField>
+                  <AdminField
+                    label="Descrição do produto"
+                    optional
+                    className="md:col-span-2"
+                    hint="Este conteúdo será exibido na página do produto."
+                  >
+                    <textarea
+                      name="descricao"
+                      className={cn(adminTextareaClass, 'min-h-40')}
+                      placeholder="Descreva materiais, numeração, notas olfativas, cuidados e outras informações importantes."
+                      defaultValue={editing.descricao}
+                    />
+                  </AdminField>
+                </div>
+              </AdminFormSection>
+
               <ProductImagesField
                 label="Fotos do produto"
-                hint="Mantenha, remova ou adicione fotos e escolha qual sera a capa."
+                hint="Mantenha, remova ou adicione fotos e escolha qual será a capa."
                 existing={editExistingImages}
                 onRemoveExisting={(id) => {
                   setEditExistingImages((current) => {
@@ -847,19 +956,97 @@ export function AdminProductsPage() {
                   setEditCoverSource('new')
                 }}
               />
+
+              <AdminFormSection
+                title="Variações (tamanho, cor, volume...)"
+                description="Com variações, o cliente escolhe uma na compra e o estoque passa a ser a soma delas."
+                action={
+                  <button
+                    type="button"
+                    className={adminButtonClass('secondary', 'sm')}
+                    onClick={() => setEditFlavors((current) => [...current, { nome: '', estoque: 0 }])}
+                  >
+                    <Plus size={16} /> Adicionar variação
+                  </button>
+                }
+              >
+                <FlavorEditor flavors={editFlavors} onChange={setEditFlavors} />
+              </AdminFormSection>
             </div>
-            <label className="flex items-center gap-2 text-sm font-semibold md:col-span-2">
-              <input name="destaque" type="checkbox" defaultChecked={editing.destaque} /> Produto em destaque
-            </label>
-            <div className="sticky bottom-0 -mx-5 mt-1 flex justify-end border-t border-line bg-white px-5 pt-3 pb-1 sm:-mx-6 sm:px-6 md:col-span-2">
-              <Button type="submit" disabled={savingEdit} className="rounded-2xl">
+
+            <div className="grid min-w-0 gap-4">
+              <AdminFormSection title="Preço e estoque">
+                <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-1">
+                  <AdminField label="Preço" required>
+                    <MaskedInput name="preco" mask="currency" defaultValue={editing.preco} required />
+                  </AdminField>
+                  <AdminField label="Preço promocional" optional>
+                    <MaskedInput
+                      name="preco_promocional"
+                      mask="currency"
+                      defaultValue={editing.preco_promocional}
+                      optional
+                    />
+                  </AdminField>
+                  <AdminField
+                    label="Estoque"
+                    required={editFlavors.length === 0}
+                    hint={editFlavors.length > 0 ? 'Calculado pela soma das variações.' : undefined}
+                  >
+                    <MaskedInput
+                      name="estoque"
+                      mask="integer"
+                      defaultValue={editing.estoque}
+                      required={editFlavors.length === 0}
+                      disabled={editFlavors.length > 0}
+                    />
+                  </AdminField>
+                </div>
+              </AdminFormSection>
+
+              <AdminFormSection title="Envio" description="Peso e medidas da embalagem para o frete.">
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-2">
+                  <AdminField
+                    label={`Peso (máx. ${CORREIOS_MAX_WEIGHT_KG} kg)`}
+                    required
+                    className="col-span-2 md:col-span-1 lg:col-span-2"
+                  >
+                    <MaskedInput name="peso_kg" mask="kg" defaultValue={editing.peso_kg} required />
+                  </AdminField>
+                  <AdminField label="Altura" required>
+                    <MaskedInput name="altura_cm" mask="cm" defaultValue={editing.altura_cm} required />
+                  </AdminField>
+                  <AdminField label="Largura" required>
+                    <MaskedInput name="largura_cm" mask="cm" defaultValue={editing.largura_cm} required />
+                  </AdminField>
+                  <AdminField label="Comprimento" required className="col-span-2 md:col-span-1 lg:col-span-2">
+                    <MaskedInput
+                      name="comprimento_cm"
+                      mask="cm"
+                      defaultValue={editing.comprimento_cm}
+                      required
+                    />
+                  </AdminField>
+                </div>
+              </AdminFormSection>
+
+              <AdminFormSection title="Visibilidade">
+                <FeaturedCheckbox defaultChecked={editing.destaque} />
+              </AdminFormSection>
+            </div>
+
+            <div className="sticky bottom-0 z-10 -mx-5 -mb-4 flex justify-end gap-2 border-t border-line bg-white px-5 py-3 sm:-mx-6 sm:-mb-5 sm:px-6 lg:col-span-2">
+              <Button type="button" variant="secondary" className="flex-1 sm:flex-none" onClick={closeEditModal}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={savingEdit} className="flex-1 sm:flex-none">
                 {savingEdit ? (
                   <>
                     <Loader2 size={16} className="animate-spin" />
                     Salvando...
                   </>
                 ) : (
-                  'Salvar alteracoes'
+                  'Salvar alterações'
                 )}
               </Button>
             </div>
@@ -873,11 +1060,11 @@ export function AdminProductsPage() {
         onClose={() => setSuccessModal(null)}
       >
         <div className="grid place-items-center gap-4 py-2 text-center">
-          <span className="grid h-14 w-14 place-items-center rounded-full bg-brand-soft text-ink">
+          <span className="grid h-14 w-14 place-items-center rounded-full bg-brand-mint text-brand">
             <CheckCircle2 size={28} />
           </span>
-          <p className="text-sm leading-relaxed text-muted">{successModal?.message}</p>
-          <Button type="button" className="w-full rounded-2xl" onClick={() => setSuccessModal(null)}>
+          <p className="text-[15px] leading-relaxed text-muted">{successModal?.message}</p>
+          <Button type="button" className="w-full" onClick={() => setSuccessModal(null)}>
             Continuar
           </Button>
         </div>
@@ -886,9 +1073,29 @@ export function AdminProductsPage() {
   )
 }
 
+function FeaturedCheckbox({ defaultChecked }: { defaultChecked?: boolean }) {
+  return (
+    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-line p-4 transition hover:border-[#D0D5DD] hover:bg-surface/60">
+      <input
+        name="destaque"
+        type="checkbox"
+        defaultChecked={defaultChecked}
+        className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-brand"
+      />
+      <span className="min-w-0">
+        <span className="block text-sm font-medium text-ink">Produto em destaque</span>
+        <span className="mt-0.5 block text-xs leading-relaxed text-muted">
+          Pode aparecer nas vitrines de destaque da página inicial.
+        </span>
+      </span>
+    </label>
+  )
+}
+
 function ProductImagesField({
   label,
   hint,
+  className,
   existing = [],
   onRemoveExisting,
   files,
@@ -899,6 +1106,7 @@ function ProductImagesField({
 }: {
   label: string
   hint: string
+  className?: string
   existing?: ProductImage[]
   onRemoveExisting?: (id: string) => void
   files: File[]
@@ -935,112 +1143,137 @@ function ProductImagesField({
   const canAddMore = total < maxPhotos
 
   return (
-    <div className="rounded-2xl border border-dashed border-line bg-[#fafaf8] p-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h3 className="font-semibold text-ink">{label}</h3>
-          <p className="text-xs text-muted">{hint} Maximo de {maxPhotos} fotos.</p>
-          {total > 0 && (
-            <p className="mt-1 text-xs font-semibold text-ink">
-              {total}/{maxPhotos} foto{total === 1 ? '' : 's'}
-            </p>
-          )}
-        </div>
-        <label
-          className={`inline-flex items-center gap-2 rounded-full border border-ink/15 bg-white px-4 py-2.5 text-sm font-semibold text-ink transition ${
-            canAddMore ? 'cursor-pointer hover:border-ink' : 'cursor-not-allowed opacity-50'
-          }`}
-        >
-          <ImagePlus size={16} />
-          Adicionar fotos
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            disabled={!canAddMore}
-            onChange={handlePick}
-          />
-        </label>
-      </div>
-
+    <AdminFormSection
+      title={label}
+      description={`${hint} Máximo de ${maxPhotos} fotos.`}
+      className={className}
+      action={
+        total > 0 ? (
+          <label
+            className={adminButtonClass(
+              'secondary',
+              'sm',
+              canAddMore ? 'cursor-pointer' : 'pointer-events-none cursor-not-allowed opacity-50',
+            )}
+          >
+            <ImagePlus size={16} />
+            Adicionar fotos
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              disabled={!canAddMore}
+              onChange={handlePick}
+            />
+          </label>
+        ) : undefined
+      }
+    >
       {total === 0 ? (
-        <p className="mt-3 text-xs text-gray-500">Nenhuma foto selecionada ainda.</p>
+        <label className="grid cursor-pointer place-items-center gap-2 rounded-xl border border-dashed border-[#D0D5DD] bg-surface/50 px-4 py-10 text-center transition hover:border-brand hover:bg-brand-mint/60">
+          <span className="grid h-11 w-11 place-items-center rounded-full bg-white text-brand ring-1 ring-line">
+            <ImagePlus size={20} />
+          </span>
+          <span className="text-sm font-semibold text-ink">Clique para adicionar fotos</span>
+          <span className="text-xs text-muted">JPG, PNG ou WEBP · até {maxPhotos} imagens</span>
+          <input type="file" accept="image/*" multiple className="hidden" onChange={handlePick} />
+        </label>
       ) : (
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-          {existing.map((image, index) => {
-            const isCover = coverSource === 'existing' && index === 0
-            return (
-            <div
-              key={image.id}
-              className="group relative overflow-hidden rounded-2xl border border-black/[0.06] bg-white"
-            >
-              <img
-                src={optimizeCloudinaryUrl(image.url, 320)}
-                alt={image.alt ?? `Foto ${index + 1}`}
-                className="aspect-square w-full object-cover"
-              />
-              {isCover && (
-                <span className="absolute left-2 top-2 rounded-full bg-brand px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-ink">
-                  Capa
-                </span>
-              )}
-              {!isCover && onSetExistingCover && (
-                <button
-                  type="button"
-                  className="absolute bottom-2 left-2 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-bold text-ink shadow-sm transition hover:bg-brand"
-                  onClick={() => onSetExistingCover(image.id)}
-                >
-                  Definir como capa
-                </button>
-              )}
-              {onRemoveExisting && (
-                <button
-                  type="button"
-                  aria-label="Remover foto"
-                  className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-ink/80 text-white opacity-90 transition hover:bg-red-600"
-                  onClick={() => onRemoveExisting(image.id)}
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
-            )
-          })}
-          {previews.map((preview, index) => {
-            const isCover = coverSource === 'new' && index === 0
-            return (
-            <div
-              key={`${preview}-${index}`}
-              className="group relative overflow-hidden rounded-2xl border border-black/[0.06] bg-white"
-            >
-              <img src={preview} alt={`Nova foto ${index + 1}`} className="aspect-square w-full object-cover" />
-              {isCover && (
-                <span className="absolute left-2 top-2 rounded-full bg-brand px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-ink">
-                  Capa
-                </span>
-              )}
-              {!isCover && (
-                <button
-                  type="button"
-                  className="absolute bottom-2 left-2 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-bold text-ink shadow-sm transition hover:bg-brand"
-                  onClick={() => onSetFileCover(index)}
-                >
-                  Definir como capa
-                </button>
-              )}
-              <button
-                type="button"
-                aria-label="Remover foto nova"
-                className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-ink/80 text-white opacity-90 transition hover:bg-red-600"
-                onClick={() => onFilesChange(files.filter((_, fileIndex) => fileIndex !== index))}
-              >
-                <X size={14} />
-              </button>
-            </div>
-            )
-          })}
-        </div>
+        <>
+          <p className="mb-3 text-xs font-medium text-muted">
+            {total}/{maxPhotos} foto{total === 1 ? '' : 's'} · a primeira é a capa
+          </p>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4">
+            {existing.map((image, index) => {
+              const isCover = coverSource === 'existing' && index === 0
+              return (
+                <PhotoTile
+                  key={image.id}
+                  src={optimizeCloudinaryUrl(image.url, 320)}
+                  alt={image.alt ?? `Foto ${index + 1}`}
+                  isCover={isCover}
+                  onSetCover={!isCover && onSetExistingCover ? () => onSetExistingCover(image.id) : undefined}
+                  onRemove={onRemoveExisting ? () => onRemoveExisting(image.id) : undefined}
+                  removeLabel="Remover foto"
+                />
+              )
+            })}
+            {previews.map((preview, index) => {
+              const isCover = coverSource === 'new' && index === 0
+              return (
+                <PhotoTile
+                  key={`${preview}-${index}`}
+                  src={preview}
+                  alt={`Nova foto ${index + 1}`}
+                  isCover={isCover}
+                  isNew
+                  onSetCover={!isCover ? () => onSetFileCover(index) : undefined}
+                  onRemove={() => onFilesChange(files.filter((_, fileIndex) => fileIndex !== index))}
+                  removeLabel="Remover foto nova"
+                />
+              )
+            })}
+          </div>
+        </>
+      )}
+    </AdminFormSection>
+  )
+}
+
+function PhotoTile({
+  src,
+  alt,
+  isCover,
+  isNew = false,
+  onSetCover,
+  onRemove,
+  removeLabel,
+}: {
+  src: string
+  alt: string
+  isCover: boolean
+  isNew?: boolean
+  onSetCover?: () => void
+  onRemove?: () => void
+  removeLabel: string
+}) {
+  return (
+    <div
+      className={cn(
+        'group relative overflow-hidden rounded-xl border bg-sand-soft',
+        isCover ? 'border-brand ring-2 ring-brand/20' : 'border-line',
+      )}
+    >
+      <img src={src} alt={alt} className="aspect-square w-full object-cover" />
+      <div className="absolute left-2 top-2 flex flex-wrap gap-1">
+        {isCover && (
+          <span className="rounded-full bg-brand px-2 py-0.5 text-[11px] font-semibold text-white">Capa</span>
+        )}
+        {isNew && !isCover && (
+          <span className="rounded-full bg-white/95 px-2 py-0.5 text-[11px] font-semibold text-ink-soft shadow-sm">
+            Nova
+          </span>
+        )}
+      </div>
+      {onSetCover && (
+        <button
+          type="button"
+          className="absolute inset-x-2 bottom-2 min-h-8 rounded-lg bg-white/95 px-2 py-1 text-xs font-semibold text-ink shadow-sm transition hover:bg-brand hover:text-white"
+          onClick={onSetCover}
+        >
+          Definir como capa
+        </button>
+      )}
+      {onRemove && (
+        <button
+          type="button"
+          aria-label={removeLabel}
+          className="absolute right-2 top-2 grid h-9 w-9 place-items-center rounded-full bg-white/95 text-ink shadow-sm transition hover:bg-danger hover:text-white"
+          onClick={onRemove}
+        >
+          <X size={16} />
+        </button>
       )}
     </div>
   )
@@ -1054,15 +1287,28 @@ function FlavorEditor({
   onChange: (flavors: FlavorDraft[]) => void
 }) {
   if (flavors.length === 0) {
-    return <p className="mt-3 text-xs text-gray-500">Sem sabores = produto unico (sem escolha).</p>
+    return (
+      <p className="rounded-xl border border-dashed border-line bg-surface/50 px-4 py-5 text-center text-sm text-muted">
+        Sem variações, o produto é vendido como item único (sem escolha).
+      </p>
+    )
   }
 
   return (
-    <div className="mt-3 grid gap-2">
+    <div className="grid gap-2">
+      <div className="grid grid-cols-[minmax(0,1fr)_88px_44px] gap-2 px-1 text-xs font-medium text-muted sm:grid-cols-[minmax(0,1fr)_140px_44px]">
+        <span>Variação</span>
+        <span>Estoque</span>
+        <span className="sr-only">Ações</span>
+      </div>
       {flavors.map((flavor, index) => (
-        <div key={index} className="grid gap-2 sm:grid-cols-[1fr_120px_auto]">
+        <div
+          key={index}
+          className="grid grid-cols-[minmax(0,1fr)_88px_44px] items-stretch gap-2 sm:grid-cols-[minmax(0,1fr)_140px_44px]"
+        >
           <Input
-            placeholder="Nome do sabor (ex: Chocolate)"
+            aria-label={`Nome da variação ${index + 1}`}
+            placeholder="Ex.: 42, Preto ou 100 ml"
             value={flavor.nome}
             onChange={(event) => {
               const next = [...flavors]
@@ -1071,8 +1317,9 @@ function FlavorEditor({
             }}
           />
           <Input
+            aria-label={`Estoque da variação ${index + 1}`}
             inputMode="numeric"
-            placeholder="Estoque"
+            placeholder="0"
             value={flavor.estoque === 0 ? '' : String(flavor.estoque)}
             onChange={(event) => {
               const digits = event.target.value.replace(/\D/g, '').slice(0, 8)
@@ -1081,13 +1328,14 @@ function FlavorEditor({
               onChange(next)
             }}
           />
-          <Button
+          <button
             type="button"
-            variant="danger"
+            aria-label={`Remover variação ${index + 1}`}
+            className="grid place-items-center rounded-xl border border-line bg-white text-muted transition hover:border-red-200 hover:bg-red-50 hover:text-danger"
             onClick={() => onChange(flavors.filter((_, flavorIndex) => flavorIndex !== index))}
           >
             <Trash2 size={16} />
-          </Button>
+          </button>
         </div>
       ))}
     </div>

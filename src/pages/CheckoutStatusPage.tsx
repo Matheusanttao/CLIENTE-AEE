@@ -1,20 +1,49 @@
+import { CircleCheck, CircleX, Clock, type LucideIcon } from 'lucide-react'
 import { useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
+import { useLocation } from 'react-router-dom'
+import { CheckoutLinkButton } from '../components/CheckoutLinkButton'
 import { useCart } from '../contexts/CartContext'
+import { useSiteSettings } from '../contexts/SiteSettingsContext'
 
-const content = {
-  '/checkout/sucesso': [
-    'Pagamento aprovado',
-    'Obrigado pela compra. O vendedor ja esta preparando o seu pedido para envio.',
-  ],
-  '/checkout/falha': ['Pagamento recusado', 'Voce pode tentar novamente pelo carrinho ou escolher outro meio de pagamento.'],
-  '/checkout/pendente': ['Pagamento pendente', 'Assim que o Mercado Pago confirmar, atualizaremos seu pedido.'],
+type StatusContent = {
+  title: string
+  description: string
+  icon: LucideIcon
+  iconClass: string
+  secondary: { label: string; to: string }
+}
+
+const content: Record<'/checkout/sucesso' | '/checkout/falha' | '/checkout/pendente', StatusContent> = {
+  '/checkout/sucesso': {
+    title: 'Pagamento aprovado',
+    description: 'Obrigado pela compra! Seu pedido já está sendo preparado para envio.',
+    icon: CircleCheck,
+    iconClass: 'bg-success/10 text-success',
+    secondary: { label: 'Continuar comprando', to: '/catalogo' },
+  },
+  '/checkout/falha': {
+    title: 'Pagamento recusado',
+    description: 'Você pode tentar novamente pelo carrinho ou escolher outro meio de pagamento.',
+    icon: CircleX,
+    iconClass: 'bg-danger/10 text-danger',
+    secondary: { label: 'Voltar ao carrinho', to: '/carrinho' },
+  },
+  '/checkout/pendente': {
+    title: 'Pagamento pendente',
+    description: 'Assim que o Mercado Pago confirmar, atualizaremos o seu pedido.',
+    icon: Clock,
+    iconClass: 'bg-brand-mint text-brand',
+    secondary: { label: 'Continuar comprando', to: '/catalogo' },
+  },
 }
 
 export function CheckoutStatusPage() {
   const location = useLocation()
   const { clearCart } = useCart()
-  const [title, description] = content[location.pathname as keyof typeof content] ?? content['/checkout/pendente']
+  const { settings } = useSiteSettings()
+  const { title, description, icon: Icon, iconClass, secondary } =
+    content[location.pathname as keyof typeof content] ?? content['/checkout/pendente']
 
   useEffect(() => {
     if (location.pathname === '/checkout/sucesso') {
@@ -24,17 +53,25 @@ export function CheckoutStatusPage() {
   }, [clearCart, location.pathname])
 
   return (
-    <section className="container grid min-h-[60vh] place-items-center py-10">
-      <div className="max-w-xl rounded-3xl border border-line bg-white p-8 text-center shadow-soft">
-        <h1 className="font-display text-3xl font-bold text-ink">{title}</h1>
-        <p className="mt-3 text-muted">{description}</p>
-        <Link
-          to="/minha-conta/pedidos"
-          className="mt-8 inline-flex items-center justify-center rounded-full bg-brand px-6 py-3 text-sm font-semibold text-ink shadow-brand transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-hover active:translate-y-0"
-        >
-          Ver meus pedidos
-        </Link>
-      </div>
-    </section>
+    <>
+      <Helmet>
+        <title>{`${title} - ${settings.store_name}`}</title>
+      </Helmet>
+      <section className="container grid min-h-[60vh] place-items-center py-12 md:py-16">
+        <div className="w-full max-w-lg rounded-2xl border border-line bg-white p-6 text-center shadow-card sm:p-10">
+          <span className={`mx-auto grid h-14 w-14 place-items-center rounded-full ${iconClass}`}>
+            <Icon size={28} aria-hidden="true" />
+          </span>
+          <h1 className="mt-5 text-2xl font-bold tracking-tight text-ink sm:text-3xl">{title}</h1>
+          <p className="mx-auto mt-3 max-w-sm text-[15px] leading-relaxed text-muted">{description}</p>
+          <div className="mt-8 grid gap-3 sm:flex sm:justify-center">
+            <CheckoutLinkButton to="/minha-conta/pedidos">Ver meus pedidos</CheckoutLinkButton>
+            <CheckoutLinkButton to={secondary.to} variant="secondary">
+              {secondary.label}
+            </CheckoutLinkButton>
+          </div>
+        </div>
+      </section>
+    </>
   )
 }

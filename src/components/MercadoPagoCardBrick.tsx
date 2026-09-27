@@ -1,4 +1,5 @@
 import { initMercadoPago, Payment } from '@mercadopago/sdk-react'
+import { CircleAlert, Info, LoaderCircle } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 const publicKey = import.meta.env.VITE_MP_PUBLIC_KEY as string | undefined
@@ -6,7 +7,7 @@ const publicKey = import.meta.env.VITE_MP_PUBLIC_KEY as string | undefined
 let mpInitialized = false
 
 function ensureMercadoPago() {
-  if (!publicKey) throw new Error('VITE_MP_PUBLIC_KEY nao configurada')
+  if (!publicKey) throw new Error('VITE_MP_PUBLIC_KEY não configurada')
   if (!mpInitialized) {
     initMercadoPago(publicKey, { locale: 'pt-BR' })
     mpInitialized = true
@@ -68,25 +69,31 @@ export function MercadoPagoCardBrick({ amount, payerEmail, disabled, onSubmit, o
 
   if (bootError) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      <p className="flex items-start gap-2 rounded-xl border border-danger/20 bg-danger/5 p-4 text-sm text-ink">
+        <CircleAlert size={18} className="mt-px shrink-0 text-danger" aria-hidden="true" />
         {bootError}
-      </div>
+      </p>
     )
   }
 
   if (!publicKey) {
     return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-        Pagamento por cartao indisponivel: chave publica do Mercado Pago ausente.
-      </div>
+      <p className="flex items-start gap-2 rounded-xl border border-line bg-surface p-4 text-sm text-ink">
+        <Info size={18} className="mt-px shrink-0 text-muted" aria-hidden="true" />
+        Pagamento por cartão indisponível: chave pública do Mercado Pago ausente.
+      </p>
     )
   }
 
   return (
     <div className={`relative min-h-[320px] ${disabled ? 'pointer-events-none opacity-60' : ''}`}>
       {!ready && (
-        <p className="absolute inset-x-0 top-8 text-center text-sm text-muted">
-          Carregando formulario de pagamento...
+        <p
+          className="absolute inset-x-0 top-8 flex items-center justify-center gap-2 text-sm text-muted"
+          role="status"
+        >
+          <LoaderCircle size={16} className="animate-spin text-brand" aria-hidden="true" />
+          Carregando formulário de pagamento...
         </p>
       )}
       <Payment
@@ -98,7 +105,7 @@ export function MercadoPagoCardBrick({ amount, payerEmail, disabled, onSubmit, o
           const message =
             typeof error === 'object' && error && 'message' in error
               ? String((error as { message: unknown }).message)
-              : 'Erro no formulario de pagamento'
+              : 'Erro no formulário de pagamento'
           onError?.(message)
         }}
         onSubmit={async ({ formData }) => {

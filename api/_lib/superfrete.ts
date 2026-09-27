@@ -59,10 +59,10 @@ function superfreteConfig() {
   const token = process.env.SUPERFRETE_TOKEN
   const originCep = onlyDigits(process.env.SUPERFRETE_ORIGIN_CEP ?? '')
   const userAgent =
-    process.env.SUPERFRETE_USER_AGENT ?? 'Passarin Suplementos (contato@passarinsuplementos.com.br)'
+    process.env.SUPERFRETE_USER_AGENT ?? 'A&E Total Mix (contato@passarinsuplementos.com.br)'
   const environment = process.env.SUPERFRETE_ENV ?? 'production'
   const baseUrl = environment === 'production' ? 'https://api.superfrete.com' : 'https://sandbox.superfrete.com'
-  const platform = process.env.SUPERFRETE_PLATFORM ?? 'Passarin Suplementos'
+  const platform = process.env.SUPERFRETE_PLATFORM ?? 'A&E Total Mix'
   return { token, originCep, userAgent, baseUrl, platform }
 }
 
@@ -241,7 +241,7 @@ export async function createSuperFreteCartForOrder(orderId: string): Promise<{
   const sender =
     senderFromApi ??
     ({
-      name: process.env.SUPERFRETE_FROM_NAME ?? 'Passarin Suplementos',
+      name: process.env.SUPERFRETE_FROM_NAME ?? 'A&E Total Mix',
       address: process.env.SUPERFRETE_FROM_ADDRESS ?? 'Endereco da loja',
       district: process.env.SUPERFRETE_FROM_DISTRICT ?? 'Centro',
       city: process.env.SUPERFRETE_FROM_CITY ?? 'Betim',

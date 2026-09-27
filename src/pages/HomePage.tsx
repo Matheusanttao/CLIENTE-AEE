@@ -1,30 +1,37 @@
-import { useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
-import type { ReactNode } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
+import { useLocation } from 'react-router-dom'
 import {
   ArrowRight,
   CreditCard,
-  Headphones,
-  Leaf,
-  Percent,
+  Mail,
+  MessageCircle,
+  QrCode,
   ShieldCheck,
+  Store,
   Truck,
-  Zap,
+  type LucideIcon,
 } from 'lucide-react'
+import { HomeCategoryShowcase } from '../components/HomeCategoryShowcase'
+import { HomeCta } from '../components/HomeCta'
+import { HomeHero } from '../components/HomeHero'
+import { HomeWholesale } from '../components/HomeWholesale'
+import { isHomeCollectionCategory } from '../components/homeCollections'
 import { ProductCard } from '../components/ProductCard'
 import { SectionCarousel } from '../components/SectionCarousel'
 import { Seo } from '../components/Seo'
-import { TestimonialCard } from '../components/TestimonialCard'
-import { Button, EmptyState, Input, Skeleton, useToast } from '../components/ui'
+import { Button, EmptyState, Input, SectionHeader, useToast } from '../components/ui'
 import { useSiteSettings } from '../contexts/SiteSettingsContext'
 import { useAvailableProductCategories, useBestSellingProducts, useProducts } from '../hooks/useProducts'
-import { testimonials } from '../lib/constants'
 import {
   buildLocalBusinessJsonLd,
   buildOrganizationJsonLd,
   buildWebsiteJsonLd,
 } from '../lib/seo'
 import { subscribeNewsletter } from '../services/newsletter'
+import type { SiteSettings } from '../types/settings'
+import { cn } from '../utils/cn'
+
+type InfoItem = { icon: LucideIcon; title: string; text: string }
 
 export function HomePage() {
   const { data: bestSelling = [], isLoading } = useBestSellingProducts()
@@ -34,18 +41,37 @@ export function HomePage() {
   const { settings } = useSiteSettings()
   const availableCategorySet = new Set(availableCategories)
   const visibleCategories = settings.categories.filter((category) => availableCategorySet.has(category.name))
+  // Tênis e Perfumes ja aparecem como blocos fixos no banner; a vitrine so aparece quando acrescenta algo.
+  const showcaseCategories = visibleCategories.every(isHomeCollectionCategory) ? [] : visibleCategories
   const { notify } = useToast()
   const [newsletterLoading, setNewsletterLoading] = useState(false)
+  const { hash } = useLocation()
+
+  // Links como "/#atacado" vindos de outras paginas: rola ate a secao depois que a home monta.
+  useEffect(() => {
+    if (!hash) return
+    const frame = window.requestAnimationFrame(() => {
+      let id = hash.slice(1)
+      try {
+        id = decodeURIComponent(id)
+      } catch {
+        // hash malformado: usa o valor bruto
+      }
+      document.getElementById(id)?.scrollIntoView({ block: 'start' })
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [hash])
 
   const handleNewsletter = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const form = new FormData(event.currentTarget)
-    const email = String(form.get('email') ?? '')
+    // Guarda o form antes do await: o React limpa event.currentTarget depois do handler.
+    const formElement = event.currentTarget
+    const email = String(new FormData(formElement).get('email') ?? '')
     try {
       setNewsletterLoading(true)
       await subscribeNewsletter(email)
       notify('E-mail cadastrado com sucesso!')
-      event.currentTarget.reset()
+      formElement.reset()
     } catch (error) {
       notify(error instanceof Error ? error.message : 'Erro ao cadastrar e-mail', 'error')
     } finally {
@@ -68,151 +94,64 @@ export function HomePage() {
       />
 
       {settings.promo_banner_enabled && settings.promo_banner_text && (
-        <div className="bg-brand px-4 py-2.5 text-center text-sm font-bold text-ink">
+        <div className="bg-brand px-4 py-2.5 text-center text-sm font-medium text-white">
           {settings.promo_banner_text}
         </div>
       )}
 
-      <section className="relative overflow-hidden bg-ink text-white">
-        <div className="absolute inset-y-0 right-0 w-full md:w-3/5 lg:w-1/2">
-          <img
-            src={settings.hero_image_url}
-            alt={settings.store_name}
-            className="h-full w-full object-cover object-top opacity-30 md:opacity-100"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/70 to-transparent md:via-ink/40" />
-        </div>
-        <div className="absolute -right-32 top-1/2 h-[520px] w-[520px] -translate-y-1/2 rounded-full bg-brand/20 blur-[120px]" />
-        <div className="container relative z-10 flex min-h-[520px] flex-col justify-center py-16 md:py-24">
-          <span className="inline-flex w-fit items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-brand">
-            <Zap size={13} fill="currentColor" /> {settings.hero_eyebrow}
-          </span>
-          <h1 className="mt-6 max-w-4xl font-display text-5xl font-extrabold leading-[1.05] tracking-tight md:text-6xl lg:text-7xl">
-            {settings.hero_title}
-            <br />
-            <span className="text-brand">{settings.hero_title_highlight}</span>
-          </h1>
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-gray-300 md:text-lg">
-            {settings.hero_subtitle}
-          </p>
-          <div className="mt-9">
-            <Link to="/catalogo">
-              <Button className="px-8 py-4 text-sm">{settings.hero_cta_label}</Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <HomeHero categories={visibleCategories} />
 
-      <section className="border-b border-line bg-white">
-        <div className="container grid gap-3 py-7 md:grid-cols-4">
-          <TrustItem icon={<ShieldCheck size={22} />} title={settings.trust_1_title} text={settings.trust_1_text} />
-          <TrustItem icon={<Truck size={22} />} title={settings.trust_2_title} text={settings.trust_2_text} />
-          <TrustItem icon={<CreditCard size={22} />} title={settings.trust_3_title} text={settings.trust_3_text} />
-          <TrustItem icon={<Headphones size={22} />} title={settings.trust_4_title} text={settings.trust_4_text} />
-        </div>
-      </section>
+      <TrustStrip settings={settings} />
 
-      <section className="container py-14">
-        <SectionHeader title="Mais" highlight="vendidos" to="/catalogo" />
-        {isLoading ? (
-          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <Skeleton key={index} className="h-80 rounded-2xl" />
-            ))}
-          </div>
-        ) : bestSelling.length > 0 ? (
-          <SectionCarousel>
-            {bestSelling.map((product) => (
-              <div key={product.id} className="min-w-[225px] max-w-[225px]">
-                <ProductCard product={product} />
-              </div>
-            ))}
-          </SectionCarousel>
+      <HomeCategoryShowcase categories={showcaseCategories} />
+
+      <section className="container pt-12 md:pt-16">
+        {!isLoading && bestSelling.length === 0 ? (
+          <>
+            <SectionHeader title="Mais vendidos" />
+            <div className="mt-6">
+              <EmptyState
+                title="Nenhum produto disponível"
+                description="Marque produtos como destaque no painel administrativo."
+              />
+            </div>
+          </>
         ) : (
-          <div className="mt-5">
-            <EmptyState
-              title="Nenhum produto disponível"
-              description="Marque produtos como destaque no painel administrativo."
-            />
-          </div>
+          <SectionCarousel
+            label="Mais vendidos"
+            header={<SectionHeader title="Mais vendidos" action={{ label: 'Ver todos', to: '/catalogo' }} />}
+          >
+            {isLoading
+              ? Array.from({ length: 4 }, (_, index) => <ProductCardSkeleton key={index} />)
+              : bestSelling.map((product) => <ProductCard key={product.id} product={product} />)}
+          </SectionCarousel>
         )}
       </section>
 
-      <section className="container pb-14">
-        <div className="grid gap-6 overflow-hidden rounded-3xl bg-gradient-to-br from-ink to-ink-soft px-8 py-9 text-white shadow-soft md:grid-cols-3">
-          <BenefitBand icon={<Percent size={24} />} title={settings.benefit_pix_title} text={settings.benefit_pix_text} />
-          <BenefitBand
-            icon={<Truck size={24} />}
-            title={settings.benefit_shipping_title}
-            text={settings.benefit_shipping_text}
-          />
-          <BenefitBand
-            icon={<CreditCard size={24} />}
-            title={settings.benefit_card_title}
-            text={settings.benefit_card_text}
-          />
-        </div>
-      </section>
+      <HomeWholesale />
 
-      <section className="container pb-14">
-        <div className="max-w-3xl">
-          <h2 className="font-display text-3xl font-bold tracking-tight text-ink md:text-4xl">
-            Suplementos em Betim
-          </h2>
-          <p className="mt-4 text-base leading-relaxed text-muted md:text-lg">
-            A Passarim Suplementos é a loja de suplementos em Betim para quem busca whey protein, creatina,
-            pré-treino, vitaminas e acessórios fitness. Compre online com entrega rápida na região
-            metropolitana de Belo Horizonte ou envio para todo o Brasil.
-          </p>
-          <Link to="/catalogo" className="mt-6 inline-flex">
-            <Button variant="secondary" className="gap-2">
-              Ver catálogo
-              <ArrowRight size={16} />
-            </Button>
-          </Link>
-        </div>
-      </section>
-
-      {visibleCategories.length > 0 && (
-        <section className="container pb-14">
-          <SectionHeader title="Categorias em" highlight="destaque" to="/catalogo" />
-          <div className="mt-6 flex flex-wrap justify-center gap-4">
-            {visibleCategories.map((category) => (
-              <Link
-                key={category.name}
-                to={`/catalogo?categoria=${encodeURIComponent(category.name)}`}
-                className="group w-[calc(50%-0.5rem)] max-w-[160px] rounded-2xl border border-line bg-white p-4 text-center shadow-card transition duration-300 hover:-translate-y-1.5 hover:border-ink/10 hover:shadow-soft sm:w-36"
-              >
-                <div className="mx-auto grid h-28 place-items-center overflow-hidden rounded-xl bg-surface">
-                  <img
-                    src={category.image}
-                    alt={category.label}
-                    className="h-24 w-24 rounded-lg object-cover transition duration-500 group-hover:scale-110"
-                  />
-                </div>
-                <h3 className="mt-4 text-[11px] font-semibold uppercase tracking-wide text-ink">
-                  {category.label}
-                </h3>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <section className="container pb-14">
-        <SectionHeader title="Produtos da" highlight="loja" to="/catalogo" />
+      <section className="container pt-12 md:pt-16">
+        <SectionHeader title="Produtos da loja" />
         {isLoadingCatalog ? (
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {Array.from({ length: 12 }).map((_, index) => (
-              <Skeleton key={index} className="h-96 rounded-2xl" />
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+            {Array.from({ length: 8 }, (_, index) => (
+              <ProductCardSkeleton key={index} />
             ))}
           </div>
         ) : catalogProducts.length > 0 ? (
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {catalogProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <>
+            <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+              {catalogProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+            <div className="mt-8 flex justify-center sm:mt-10">
+              <HomeCta to="/catalogo" variant="secondary" size="lg">
+                Ver todos os produtos
+                <ArrowRight size={16} aria-hidden />
+              </HomeCta>
+            </div>
+          </>
         ) : (
           <div className="mt-6">
             <EmptyState
@@ -221,103 +160,141 @@ export function HomePage() {
             />
           </div>
         )}
-        {catalogProducts.length > 0 && (
-          <div className="mt-8 flex justify-center">
-            <Link to="/catalogo">
-              <Button variant="secondary" className="gap-2">
-                Ver todos os produtos
-                <ArrowRight size={16} />
-              </Button>
-            </Link>
-          </div>
-        )}
       </section>
 
-      <section className="bg-ink py-16 text-white">
-        <div className="container">
-          <div className="text-center">
-            <span className="text-xs font-medium uppercase tracking-[0.2em] text-brand">Depoimentos</span>
-            <h2 className="mt-3 font-display text-3xl font-bold">
-              O que nossos <span className="text-brand">clientes</span> dizem
-            </h2>
-          </div>
-          <div className="mt-9">
-            <SectionCarousel>
-              {testimonials.map((testimonial) => (
-                <TestimonialCard key={testimonial.name} {...testimonial} />
-              ))}
-            </SectionCarousel>
-          </div>
-        </div>
-      </section>
+      <BenefitsBand settings={settings} />
 
-      <section className="bg-ink pb-16 text-white">
-        <div className="container">
-          <div className="grid gap-7 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.07] to-transparent p-8 md:grid-cols-[1fr_1.2fr] md:items-center md:p-10">
-            <div className="flex items-center gap-4">
-              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-brand text-ink">
-                <Leaf size={28} />
-              </span>
-              <div>
-                <h2 className="font-display text-xl font-bold">{settings.newsletter_title}</h2>
-                <p className="mt-1 text-sm text-gray-400">{settings.newsletter_subtitle}</p>
-              </div>
+      <section className="container py-12 md:py-16">
+        <div className="grid items-center gap-6 rounded-2xl border border-line bg-white p-6 shadow-card sm:p-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:gap-10">
+          <div className="flex items-start gap-4">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-brand-soft text-brand" aria-hidden>
+              <Mail size={22} />
+            </span>
+            <div className="min-w-0">
+              <h2 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">{settings.newsletter_title}</h2>
+              {settings.newsletter_subtitle && (
+                <p className="mt-1.5 text-[15px] leading-relaxed text-muted">{settings.newsletter_subtitle}</p>
+              )}
             </div>
-            <form className="flex flex-col gap-3 sm:flex-row" onSubmit={handleNewsletter}>
-              <Input
-                className="border-white/10 bg-white/10 text-white placeholder:text-gray-400 focus:border-brand focus:ring-brand/20"
-                type="email"
-                name="email"
-                placeholder="Seu melhor e-mail"
-                required
-              />
-              <Button type="submit" className="shrink-0 px-8" disabled={newsletterLoading}>
-                {newsletterLoading ? 'Enviando...' : 'Cadastrar'}
-              </Button>
-            </form>
           </div>
+          <form className="flex flex-col gap-3 sm:flex-row" onSubmit={handleNewsletter}>
+            <label htmlFor="newsletter-email" className="sr-only">
+              Seu e-mail
+            </label>
+            <Input
+              id="newsletter-email"
+              className="h-12 sm:flex-1"
+              type="email"
+              name="email"
+              autoComplete="email"
+              placeholder="Seu melhor e-mail"
+              required
+            />
+            <Button type="submit" className="h-12 shrink-0 sm:px-8" disabled={newsletterLoading}>
+              {newsletterLoading ? 'Enviando...' : 'Cadastrar'}
+            </Button>
+          </form>
         </div>
       </section>
     </>
   )
 }
 
-function BenefitBand({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
-  return (
-    <div className="flex items-center gap-4">
-      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-brand/15 text-brand">{icon}</span>
-      <span>
-        <strong className="block text-sm font-semibold">{title}</strong>
-        <small className="text-xs text-gray-400">{text}</small>
-      </span>
-    </div>
-  )
-}
+/** Faixa de confianca logo abaixo do banner (textos editaveis em Configurações). */
+function TrustStrip({ settings }: { settings: SiteSettings }) {
+  const items: InfoItem[] = [
+    { icon: Store, title: settings.trust_1_title, text: settings.trust_1_text },
+    { icon: Truck, title: settings.trust_2_title, text: settings.trust_2_text },
+    { icon: ShieldCheck, title: settings.trust_3_title, text: settings.trust_3_text },
+    { icon: MessageCircle, title: settings.trust_4_title, text: settings.trust_4_text },
+  ].filter((item) => item.title?.trim())
 
-function TrustItem({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
-  return (
-    <div className="flex items-center gap-3 px-3 py-2 md:border-r md:border-line last:md:border-r-0">
-      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-surface text-ink">{icon}</span>
-      <span>
-        <strong className="block text-xs font-semibold text-ink">{title}</strong>
-        <small className="text-[11px] text-muted">{text}</small>
-      </span>
-    </div>
-  )
-}
+  if (items.length === 0) return null
 
-function SectionHeader({ title, highlight, to }: { title: string; highlight: string; to: string }) {
   return (
-    <div className="flex items-end justify-between gap-4">
-      <h2 className="font-display text-3xl font-bold text-ink">
-        {title} <span className="text-brand-hover">{highlight}</span>
-      </h2>
-      <Link
-        to={to}
-        className="group flex shrink-0 items-center gap-1.5 text-sm font-semibold text-ink transition hover:text-brand-hover"
+    <section className="container mt-4 sm:mt-6" aria-label="Por que comprar com a gente">
+      <ul
+        className={cn(
+          'grid gap-px overflow-hidden rounded-2xl border border-line bg-line',
+          items.length === 1 ? 'grid-cols-1' : 'grid-cols-2',
+          items.length === 3 && 'lg:grid-cols-3',
+          items.length === 4 && 'lg:grid-cols-4',
+        )}
       >
-        Ver todos <ArrowRight size={16} className="transition group-hover:translate-x-0.5" />
-      </Link>
+        {items.map(({ icon: Icon, title, text }, index) => (
+          <li
+            key={`${index}-${title}`}
+            className={cn(
+              'flex flex-col gap-3 bg-white p-4 sm:flex-row sm:items-center sm:gap-3.5 sm:p-5',
+              items.length > 1 && items.length % 2 === 1 && index === items.length - 1 && 'col-span-2 lg:col-span-1',
+            )}
+          >
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-soft text-brand" aria-hidden>
+              <Icon size={19} />
+            </span>
+            <span className="min-w-0">
+              <strong className="block text-sm font-semibold leading-snug text-ink">{title}</strong>
+              {text && <span className="mt-0.5 block text-xs leading-relaxed text-muted sm:text-[13px]">{text}</span>}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+/** Vantagens de pagamento/frete: cada item so aparece quando o recurso esta ativo em Configurações. */
+function BenefitsBand({ settings }: { settings: SiteSettings }) {
+  const items: InfoItem[] = []
+  if (settings.pix_discount_enabled && settings.benefit_pix_title?.trim()) {
+    items.push({ icon: QrCode, title: settings.benefit_pix_title, text: settings.benefit_pix_text })
+  }
+  if (settings.free_shipping_enabled && settings.benefit_shipping_title?.trim()) {
+    items.push({ icon: Truck, title: settings.benefit_shipping_title, text: settings.benefit_shipping_text })
+  }
+  const cardTitle = settings.benefit_card_title?.trim() || settings.installments_text?.trim()
+  if (cardTitle) {
+    items.push({ icon: CreditCard, title: cardTitle, text: settings.benefit_card_text })
+  }
+
+  if (items.length === 0) return null
+
+  return (
+    <section className="container pt-12 md:pt-16" aria-label="Formas de pagamento e entrega">
+      <ul
+        className={cn(
+          'grid gap-5 rounded-2xl bg-surface p-6 sm:p-8',
+          items.length === 2 && 'sm:grid-cols-2 sm:gap-8',
+          items.length === 3 && 'md:grid-cols-3 md:gap-8',
+        )}
+      >
+        {items.map(({ icon: Icon, title, text }, index) => (
+          <li key={`${index}-${title}`} className="flex items-center gap-4">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-white text-brand shadow-card" aria-hidden>
+              <Icon size={22} />
+            </span>
+            <span className="min-w-0">
+              <strong className="block text-[15px] font-semibold text-ink">{title}</strong>
+              {text && <span className="mt-0.5 block text-sm leading-relaxed text-muted">{text}</span>}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+/** Placeholder no mesmo formato do ProductCard (foto quadrada + textos + botao). */
+function ProductCardSkeleton() {
+  return (
+    <div className="h-full overflow-hidden rounded-2xl border border-line bg-white" aria-hidden>
+      <div className="aspect-square animate-pulse bg-surface" />
+      <div className="space-y-2.5 p-3 sm:p-4">
+        <div className="h-3 w-1/3 animate-pulse rounded-md bg-surface" />
+        <div className="h-4 w-4/5 animate-pulse rounded-md bg-surface" />
+        <div className="h-5 w-2/5 animate-pulse rounded-md bg-surface" />
+        <div className="mt-4 h-10 w-full animate-pulse rounded-xl bg-surface sm:h-11" />
+      </div>
     </div>
   )
 }

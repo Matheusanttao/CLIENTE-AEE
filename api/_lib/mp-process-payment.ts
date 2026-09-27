@@ -127,7 +127,7 @@ export default async function handler(request: VercelRequest, response: VercelRe
     ...formData,
     transaction_amount: expectedTotal,
     external_reference: order.id,
-    description: order.frete_servico ? `Pedido FIT - ${order.id}` : `Pedido FIT - ${order.id}`,
+    description: `Pedido A&E Total Mix - ${order.id}`,
     ...(isLocalAppUrl(appUrl) ? {} : { notification_url: `${appUrl}/api/mp/webhook` }),
   }
 

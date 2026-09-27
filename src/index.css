@@ -1,31 +1,48 @@
 @import "tailwindcss";
 
+/*
+ * Design system A&E Total Mix
+ * Azul principal nos pontos de interacao; fundos neutros (branco, cinza claro, bege)
+ * e grafite para textos. A logo mantem as cores originais.
+ */
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Sora", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  --color-brand: #c4f000;
-  --color-brand-hover: #b2dd00;
-  --color-brand-soft: #eaffb0;
-  --color-brand-mint: #f6ffdb;
+  /* Azul principal (botoes, links, destaques) */
+  --color-brand: #0066ff;
+  --color-brand-hover: #0052cc;
+  /* Azul claro (secao de atacado, detalhes suaves) */
+  --color-brand-soft: #dceeff;
+  --color-brand-mint: #eef6ff;
 
-  --color-ink: #0d0f12;
-  --color-ink-soft: #16191f;
-  --color-muted: #6b7280;
-  --color-surface: #f6f7f4;
-  --color-line: #ececeb;
-  --color-success: #16a34a;
-  --color-promo: #dc2626;
+  /* Grafite (titulos e textos principais) */
+  --color-ink: #101828;
+  --color-ink-soft: #1d2939;
+  /* Cinza medio (textos secundarios) */
+  --color-muted: #667085;
+  /* Cinza claro (busca, filtros, fundos secundarios) */
+  --color-surface: #f2f3f6;
+  --color-line: #e4e7ec;
+  /* Bege suave (cenarios de fotos e banner) */
+  --color-sand: #e8dfd2;
+  --color-sand-soft: #f5f0e9;
 
-  --shadow-soft: 0 24px 70px -28px rgba(13, 15, 18, 0.35);
-  --shadow-card: 0 1px 2px rgba(13, 15, 18, 0.04), 0 18px 40px -24px rgba(13, 15, 18, 0.2);
-  --shadow-brand: 0 14px 30px -12px rgba(196, 240, 0, 0.5);
+  --color-success: #12b76a;
+  --color-danger: #d92d20;
+  --color-promo: #0066ff;
+
+  --radius-card: 1rem;
+
+  --shadow-soft: 0 12px 32px -12px rgba(16, 24, 40, 0.14);
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 12px -4px rgba(16, 24, 40, 0.06);
+  --shadow-brand: 0 6px 16px -8px rgba(0, 102, 255, 0.55);
 }
 
 /* Em @layer base para nao sobrescrever utilitarios Tailwind (ex: text-white em links). */
 @layer base {
   :root {
-    color: #0d0f12;
+    color: #101828;
     background: #ffffff;
     font-family: var(--font-sans);
     font-synthesis: none;
@@ -46,10 +63,7 @@
     margin: 0;
     min-width: 320px;
     min-height: 100vh;
-    background:
-      radial-gradient(circle at 0% -10%, rgba(196, 240, 0, 0.08), transparent 32rem),
-      radial-gradient(circle at 100% 0%, rgba(13, 15, 18, 0.04), transparent 30rem),
-      #fcfcfb;
+    background: #ffffff;
   }
 
   h1,
@@ -58,7 +72,7 @@
   h4,
   h5 {
     font-family: var(--font-display);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
   }
 
   a {
@@ -74,14 +88,20 @@
   }
 
   ::selection {
-    background: rgba(196, 240, 0, 0.4);
-    color: #0d0f12;
+    background: #dceeff;
+    color: #101828;
   }
 }
 
 .container {
-  width: min(1200px, calc(100% - 2.5rem));
+  width: min(1240px, calc(100% - 2rem));
   margin-inline: auto;
+}
+
+@media (min-width: 640px) {
+  .container {
+    width: min(1240px, calc(100% - 3rem));
+  }
 }
 
 .line-clamp-2 {
@@ -102,7 +122,7 @@
 @keyframes float-up {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -111,21 +131,29 @@
 }
 
 .animate-float-up {
-  animation: float-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: float-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-up,
+  .admin-metric {
+    animation: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 .admin-shell {
-  background:
-    linear-gradient(180deg, #f4f5f2 0%, #eef0eb 100%);
-  color: #0d0f12;
+  background: #f2f3f6;
+  color: #101828;
 }
 
 .admin-metric {
-  animation: float-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: float-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .admin-main {
-  background-image:
-    radial-gradient(circle at 1px 1px, rgba(13, 15, 18, 0.035) 1px, transparent 0);
-  background-size: 22px 22px;
+  background-image: none;
 }

@@ -1,86 +1,155 @@
-import { Heart, Search, ShoppingCart, User } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { ArrowRight, Heart, Menu, Search, ShoppingBag, User } from 'lucide-react'
+import { useRef } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../contexts/CartContext'
+import { cn } from '../utils/cn'
 import { formatCurrency } from '../utils/format'
 import { CategoryNav } from './CategoryNav'
+import { HeaderMobileMenu } from './HeaderMobileMenu'
+import { useRouteScopedOpen } from './headerNav'
 import { StoreLogo } from './StoreLogo'
 import { TopBar } from './TopBar'
 
-export function Header() {
+/** Botoes de icone do cabecalho: fundo neutro no hover, foco com anel azul suave. */
+const iconAction =
+  'relative h-10 min-w-10 shrink-0 items-center justify-center rounded-xl text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 lg:h-11 lg:min-w-11'
+
+function SearchForm({ className }: { className?: string }) {
   const navigate = useNavigate()
+  const location = useLocation()
+  // Mantem o termo buscado visivel no campo enquanto o cliente esta no catalogo.
+  const currentQuery =
+    location.pathname === '/catalogo' ? (new URLSearchParams(location.search).get('busca') ?? '') : ''
+
+  return (
+    <form
+      role="search"
+      className={cn('group relative', className)}
+      onSubmit={(event) => {
+        event.preventDefault()
+        const form = new FormData(event.currentTarget)
+        const query = String(form.get('busca') ?? '').trim()
+        const field = event.currentTarget.elements.namedItem('busca')
+        if (field instanceof HTMLInputElement) field.blur()
+        navigate(query ? `/catalogo?busca=${encodeURIComponent(query)}` : '/catalogo')
+      }}
+    >
+      <label htmlFor="header-search" className="sr-only">
+        Buscar produtos
+      </label>
+      <Search
+        size={20}
+        aria-hidden
+        className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted transition-colors group-focus-within:text-brand"
+      />
+      <input
+        key={currentQuery}
+        id="header-search"
+        name="busca"
+        type="search"
+        defaultValue={currentQuery}
+        placeholder="Buscar tênis, perfumes e mais"
+        autoComplete="off"
+        enterKeyHint="search"
+        className={cn(
+          'h-12 w-full rounded-xl border border-transparent bg-surface pl-12 pr-14 text-[15px] text-ink outline-none transition sm:pr-28',
+          'placeholder:text-muted hover:border-line focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/15',
+          'appearance-none [&::-webkit-search-cancel-button]:appearance-none',
+        )}
+      />
+      <button
+        type="submit"
+        aria-label="Buscar"
+        className="absolute inset-y-1 right-1 inline-flex w-10 items-center justify-center gap-2 rounded-lg bg-brand text-sm font-semibold text-white transition-colors hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 sm:w-auto sm:px-5"
+      >
+        <ArrowRight size={18} aria-hidden className="sm:hidden" />
+        <span className="hidden sm:inline">Buscar</span>
+      </button>
+    </form>
+  )
+}
+
+export function Header() {
   const { user } = useAuth()
   const { items, total } = useCart()
   const count = items.reduce((sum, item) => sum + item.quantity, 0)
+  // A gaveta fica presa a rota em que foi aberta: qualquer navegacao a fecha sem precisar de efeito.
+  const { open: menuOpen, openMenu, close: closeMenu } = useRouteScopedOpen()
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+
+  const accountLabel = user ? 'Minha conta' : 'Entrar'
+  const cartLabel =
+    count > 0 ? `Carrinho: ${count} ${count === 1 ? 'item' : 'itens'}, total ${formatCurrency(total)}` : 'Carrinho vazio'
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-ink text-white">
+    <>
       <TopBar />
-      <div className="container grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-3 sm:gap-4 sm:py-4 lg:grid-cols-[minmax(200px,300px)_1fr_minmax(240px,320px)]">
-        <StoreLogo />
-        <form
-          className="col-span-2 row-start-2 flex h-12 items-center overflow-hidden rounded-full bg-white pl-5 transition focus-within:ring-4 focus-within:ring-brand/20 lg:col-span-1 lg:col-start-2 lg:row-start-1"
-          onSubmit={(event) => {
-            event.preventDefault()
-            const form = new FormData(event.currentTarget)
-            navigate(`/catalogo?busca=${encodeURIComponent(String(form.get('busca') ?? ''))}`)
-          }}
-        >
-          <input
-            name="busca"
-            placeholder="Buscar produtos..."
-            className="h-full w-full bg-transparent px-1 text-sm text-ink outline-none placeholder:text-gray-400"
-          />
-          <button
-            type="submit"
-            aria-label="Buscar"
-            className="m-1 grid h-10 w-10 shrink-0 place-items-center rounded-full bg-ink text-white transition hover:bg-ink-soft"
-          >
-            <Search size={18} />
-          </button>
-        </form>
-        <div className="col-start-2 row-start-1 flex items-center justify-end gap-1 sm:gap-3 lg:col-start-3">
-          {user ? (
-            <Link
-              to="/minha-conta"
-              className="inline-flex h-10 w-10 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 text-sm font-semibold text-white transition hover:border-brand/50 hover:bg-white/10 sm:h-auto sm:w-auto sm:px-4 sm:py-2"
+      <header className="sticky top-0 z-40 border-b border-line bg-white">
+        <div className="container grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2.5 pb-3 pt-2.5 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:gap-x-10 lg:py-3">
+          <div className="flex min-w-0 items-center gap-1">
+            <button
+              ref={menuButtonRef}
+              type="button"
+              aria-label="Abrir menu"
+              aria-expanded={menuOpen}
+              aria-controls="header-mobile-menu"
+              onClick={openMenu}
+              className={cn(iconAction, '-ml-2 inline-flex lg:hidden')}
             >
-              <User size={18} />
-              <span className="hidden sm:inline">Minha conta</span>
-            </Link>
-          ) : (
+              <Menu size={24} aria-hidden />
+            </button>
+            <StoreLogo />
+          </div>
+
+          <SearchForm className="col-span-2 row-start-2 lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:mx-auto lg:w-full lg:max-w-[640px]" />
+
+          <nav
+            aria-label="Atalhos da conta"
+            className="col-start-2 row-start-1 -mr-2 flex items-center justify-end gap-0.5 sm:gap-1 lg:col-start-3 lg:-mr-3"
+          >
             <Link
-              to="/login"
-              aria-label="Entrar"
-              className="inline-flex h-10 w-10 items-center justify-center gap-2 rounded-full bg-brand text-sm font-bold text-ink shadow-brand transition hover:bg-brand-hover sm:h-auto sm:w-auto sm:px-4 sm:py-2"
+              to={user ? '/minha-conta' : '/login'}
+              aria-label={accountLabel}
+              className={cn(iconAction, 'inline-flex gap-2 md:px-3')}
             >
-              <User size={18} />
-              <span className="hidden sm:inline">Entrar</span>
+              <User size={22} aria-hidden />
+              <span className="hidden text-sm font-semibold md:inline">{accountLabel}</span>
             </Link>
-          )}
-          <Link
-            to="/minha-conta/favoritos"
-            aria-label="Favoritos"
-            className="grid h-10 w-10 place-items-center rounded-full text-white transition hover:bg-white/10 sm:h-11 sm:w-11"
-          >
-            <Heart size={22} />
-          </Link>
-          <Link
-            to="/carrinho"
-            aria-label="Carrinho"
-            className="grid h-10 w-10 place-items-center text-white transition hover:text-brand sm:flex sm:w-auto sm:gap-3"
-          >
-            <span className="relative">
-              <ShoppingCart size={22} />
-              <span className="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-brand px-1 text-[10px] font-bold text-ink">
-                {count}
+
+            <Link
+              to="/minha-conta/favoritos"
+              aria-label="Favoritos"
+              title="Favoritos"
+              className={cn(iconAction, 'hidden sm:inline-flex')}
+            >
+              <Heart size={22} aria-hidden />
+            </Link>
+
+            <Link to="/carrinho" aria-label={cartLabel} className={cn(iconAction, 'inline-flex gap-3 md:pl-2.5 md:pr-3')}>
+              <span className="relative inline-flex">
+                <ShoppingBag size={22} aria-hidden />
+                {count > 0 && (
+                  <span
+                    className="absolute -right-2.5 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-brand px-1 text-[11px] font-semibold leading-none tabular-nums text-white ring-2 ring-white"
+                    aria-hidden
+                  >
+                    {count > 99 ? '99+' : count}
+                  </span>
+                )}
               </span>
-            </span>
-            <strong className="hidden text-sm font-semibold md:block">{formatCurrency(total)}</strong>
-          </Link>
+              <span className="hidden text-left leading-tight md:block" aria-hidden>
+                <span className="block text-xs font-medium text-muted">Carrinho</span>
+                <span className="block text-sm font-bold tabular-nums text-ink">{formatCurrency(total)}</span>
+              </span>
+            </Link>
+          </nav>
         </div>
-      </div>
-      <CategoryNav />
-    </header>
+
+        <CategoryNav />
+      </header>
+
+      <HeaderMobileMenu open={menuOpen} onClose={closeMenu} returnFocusRef={menuButtonRef} />
+    </>
   )
 }

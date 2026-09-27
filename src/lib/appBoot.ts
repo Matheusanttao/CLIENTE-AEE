@@ -61,15 +61,10 @@ export function updateAppPreloaderBrand(brand: SplashBrand): void {
   const root = document.getElementById(PRELOADER_ID)
   if (!root) return
 
-  const brandColor = brand.color_brand?.trim() || '#c4f000'
-  const inkColor = brand.color_ink?.trim() || '#0d0f12'
+  const brandColor = brand.color_brand?.trim() || '#0066FF'
+  const inkColor = brand.color_ink?.trim() || '#101828'
   root.style.setProperty('--splash-brand', brandColor)
   root.style.setProperty('--splash-ink', inkColor)
-  root.style.background = `
-    radial-gradient(circle at 20% 0%, color-mix(in srgb, ${brandColor} 18%, transparent), transparent 42%),
-    radial-gradient(circle at 90% 100%, color-mix(in srgb, ${brandColor} 8%, transparent), transparent 40%),
-    ${inkColor}
-  `
 
   const name =
     brand.store_name_short?.trim() ||

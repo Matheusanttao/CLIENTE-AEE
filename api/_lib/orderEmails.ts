@@ -41,6 +41,7 @@ type EmailBranding = {
   store_tagline?: string
   logo_enabled?: boolean
   logo_url?: string
+  logo_show_text?: boolean
   support_email?: string
   color_brand?: string
   color_ink?: string
@@ -71,6 +72,49 @@ function safeColor(value: string | undefined, fallback: string) {
   return value && /^#[\da-f]{6}$/i.test(value) ? value : fallback
 }
 
+const DEFAULT_STORE_NAME = 'A&E Total Mix'
+const DEFAULT_STORE_TAGLINE = 'Varejo e Atacado'
+const DEFAULT_LOGO_URL = '/aee-wordmark.webp'
+const DEFAULT_BRAND_COLOR = '#0066FF'
+const DEFAULT_INK_COLOR = '#101828'
+const MUTED_COLOR = '#667085'
+const SURFACE_COLOR = '#F2F3F6'
+const LINE_COLOR = '#E4E7EC'
+
+/** Cores da identidade anterior (verde-limao/preto) que ainda podem estar salvas no banco. */
+const legacyBrandColors = new Set(['#c4f000', '#b2dd00'])
+const legacyInkColors = new Set(['#0d0f12', '#171717'])
+const legacyStoreName = /passari[nm]|suplement/i
+const legacyLogos = new Set(['/passarin-logo.png'])
+
+/** Cor principal dos e-mails: usa a configurada no admin, trocando o antigo verde-limao pelo azul atual. */
+function brandColor(value: string | undefined) {
+  const color = safeColor(value, DEFAULT_BRAND_COLOR)
+  return legacyBrandColors.has(color.toLowerCase()) ? DEFAULT_BRAND_COLOR : color
+}
+
+function inkColor(value: string | undefined) {
+  const color = safeColor(value, DEFAULT_INK_COLOR)
+  return legacyInkColors.has(color.toLowerCase()) ? DEFAULT_INK_COLOR : color
+}
+
+/** Nome, slogan e logo da loja, ignorando valores salvos da identidade anterior. */
+function storeIdentity(branding: EmailBranding) {
+  const rawName = branding.store_name?.trim() ?? ''
+  const legacy = legacyStoreName.test(rawName)
+  const name = !rawName || legacy ? DEFAULT_STORE_NAME : rawName
+  const rawTagline = branding.store_tagline?.trim() ?? ''
+  const tagline = legacy || /suplement/i.test(rawTagline) ? DEFAULT_STORE_TAGLINE : rawTagline
+  const rawLogo = branding.logo_url?.trim() ?? ''
+  const logo =
+    branding.logo_enabled === false
+      ? ''
+      : legacy || !rawLogo || legacyLogos.has(rawLogo)
+        ? DEFAULT_LOGO_URL
+        : rawLogo
+  return { name, tagline, logo, showText: !legacy && branding.logo_show_text === true }
+}
+
 function absoluteUrl(value: string | null | undefined) {
   if (!value) return null
   if (/^https?:\/\//i.test(value)) return value
@@ -87,22 +131,22 @@ function productRows(items: OrderItem[], ink: string) {
       )[0]
       const imageUrl = absoluteUrl(image?.url)
       const flavor = item.sabor_nome
-        ? `<div style="margin-top:3px;color:#737373;font-size:13px">Sabor: ${escapeHtml(item.sabor_nome)}</div>`
+        ? `<div style="margin-top:3px;color:${MUTED_COLOR};font-size:13px">Variação: ${escapeHtml(item.sabor_nome)}</div>`
         : ''
       return `<tr>
-        <td style="padding:12px 0;border-bottom:1px solid #eeeeee;width:64px;vertical-align:middle">
+        <td style="padding:12px 0;border-bottom:1px solid ${LINE_COLOR};width:64px;vertical-align:middle">
           ${
             imageUrl
-              ? `<img src="${escapeHtml(imageUrl)}" width="52" height="52" alt="" style="display:block;width:52px;height:52px;object-fit:cover;border-radius:12px;background:#f5f5f5">`
-              : `<div style="width:52px;height:52px;border-radius:12px;background:#f0f0f0"></div>`
+              ? `<img src="${escapeHtml(imageUrl)}" width="52" height="52" alt="" style="display:block;width:52px;height:52px;object-fit:cover;border-radius:12px;background:${SURFACE_COLOR}">`
+              : `<div style="width:52px;height:52px;border-radius:12px;background:${SURFACE_COLOR}"></div>`
           }
         </td>
-        <td style="padding:12px 8px;border-bottom:1px solid #eeeeee;vertical-align:middle">
+        <td style="padding:12px 8px;border-bottom:1px solid ${LINE_COLOR};vertical-align:middle">
           <div style="font-size:15px;font-weight:700;color:${ink}">${escapeHtml(product?.nome ?? 'Produto')}</div>
           ${flavor}
-          <div style="margin-top:3px;color:#737373;font-size:13px">Quantidade: ${item.quantidade}</div>
+          <div style="margin-top:3px;color:${MUTED_COLOR};font-size:13px">Quantidade: ${item.quantidade}</div>
         </td>
-        <td style="padding:12px 0;border-bottom:1px solid #eeeeee;text-align:right;vertical-align:middle;white-space:nowrap;font-size:14px;font-weight:700;color:${ink}">
+        <td style="padding:12px 0;border-bottom:1px solid ${LINE_COLOR};text-align:right;vertical-align:middle;white-space:nowrap;font-size:14px;font-weight:700;color:${ink}">
           ${escapeHtml(formatCurrency(Number(item.preco_unitario) * item.quantidade))}
         </td>
       </tr>`
@@ -121,41 +165,42 @@ function emailTemplate({
   content: string
   branding: EmailBranding
 }) {
-  const storeName = escapeHtml(branding.store_name?.trim() || 'Passarin Suplementos')
-  const tagline = branding.store_tagline?.trim() ? escapeHtml(branding.store_tagline.trim()) : ''
-  const brand = safeColor(branding.color_brand, '#c4f000')
-  const ink = safeColor(branding.color_ink, '#171717')
-  const logoUrl = branding.logo_enabled === false ? null : absoluteUrl(branding.logo_url)
+  const identity = storeIdentity(branding)
+  const storeName = escapeHtml(identity.name)
+  const tagline = identity.tagline ? escapeHtml(identity.tagline) : ''
+  const brand = brandColor(branding.color_brand)
+  const ink = inkColor(branding.color_ink)
+  const logoUrl = identity.logo ? absoluteUrl(identity.logo) : null
   const support = branding.support_email?.trim()
   const header = logoUrl
-    ? `<img src="${escapeHtml(logoUrl)}" alt="${storeName}" style="display:block;max-width:180px;max-height:64px;margin:0 auto">
-       <div style="margin-top:8px;font-size:16px;font-weight:800;color:${ink}">${storeName}</div>`
-    : `<div style="font-size:19px;font-weight:800;letter-spacing:.02em;color:${ink}">${storeName}</div>`
+    ? `<img src="${escapeHtml(logoUrl)}" alt="${storeName}" style="display:block;max-width:200px;max-height:72px;height:auto;margin:0 auto;border:0">
+       ${identity.showText ? `<div style="margin-top:8px;font-size:16px;font-weight:700;color:${ink}">${storeName}</div>` : ''}`
+    : `<div style="font-size:20px;font-weight:700;color:${ink}">${storeName}</div>
+       ${tagline ? `<div style="margin-top:4px;font-size:12px;color:${MUTED_COLOR}">${tagline}</div>` : ''}`
 
   return `<!doctype html>
 <html lang="pt-BR">
   <head><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-  <body style="margin:0;padding:0;background:#f4f4f2;font-family:Arial,Helvetica,sans-serif;color:${ink}">
+  <body style="margin:0;padding:0;background:${SURFACE_COLOR};font-family:Arial,Helvetica,sans-serif;color:${ink}">
     <div style="display:none;max-height:0;overflow:hidden;opacity:0">${escapeHtml(preview)}</div>
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f4f2">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:${SURFACE_COLOR}">
       <tr><td align="center" style="padding:28px 12px">
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px">
-          <tr><td align="center" style="padding:18px 20px;background:${brand};border-radius:22px 22px 0 0">
+          <tr><td align="center" style="padding:22px 24px;background:#ffffff;border:1px solid ${LINE_COLOR};border-bottom:4px solid ${brand};border-radius:16px 16px 0 0">
             ${header}
-            ${!logoUrl && tagline ? `<div style="margin-top:6px;font-size:12px;color:${ink};opacity:.72">${tagline}</div>` : ''}
           </td></tr>
-          <tr><td style="background:#ffffff;padding:34px 30px;border:1px solid #e7e7e3;border-top:0">
-            <h1 style="margin:0 0 20px;font-size:28px;line-height:1.2;color:${ink}">${escapeHtml(title)}</h1>
+          <tr><td style="background:#ffffff;padding:34px 30px;border-left:1px solid ${LINE_COLOR};border-right:1px solid ${LINE_COLOR}">
+            <h1 style="margin:0 0 20px;font-size:26px;line-height:1.25;color:${ink}">${escapeHtml(title)}</h1>
             ${content}
           </td></tr>
-          <tr><td align="center" style="padding:20px 24px;background:${ink};border-radius:0 0 22px 22px;color:#ffffff">
-            <div style="font-size:13px;font-weight:700">${storeName}</div>
+          <tr><td align="center" style="padding:20px 24px;background:#ffffff;border:1px solid ${LINE_COLOR};border-radius:0 0 16px 16px">
+            <div style="font-size:13px;font-weight:700;color:${ink}">${storeName}</div>
             ${
               support
-                ? `<div style="margin-top:7px;font-size:12px;color:#d4d4d4">Atendimento: ${escapeHtml(support)}</div>`
+                ? `<div style="margin-top:6px;font-size:12px;color:${MUTED_COLOR}">Atendimento: <a href="mailto:${escapeHtml(support)}" style="color:${brand};text-decoration:none">${escapeHtml(support)}</a></div>`
                 : ''
             }
-            <div style="margin-top:7px;font-size:11px;color:#a3a3a3">Mensagem automática sobre o seu pedido.</div>
+            <div style="margin-top:6px;font-size:11px;color:${MUTED_COLOR}">Esta é uma mensagem automática da loja.</div>
           </td></tr>
         </table>
       </td></tr>
@@ -275,8 +320,8 @@ async function sendOrderEmail(orderId: string, type: NotificationType): Promise<
 
   const firstName = escapeHtml(user?.nome?.trim().split(/\s+/)[0] || 'cliente')
   const shortOrderId = escapeHtml(order.id.slice(0, 8).toUpperCase())
-  const ink = safeColor(branding.color_ink, '#171717')
-  const brand = safeColor(branding.color_brand, '#c4f000')
+  const ink = inkColor(branding.color_ink)
+  const brand = brandColor(branding.color_brand)
   const items = order.itens_pedido ?? []
   const rows = productRows(items, ink)
   const ordersUrl = absoluteUrl('/minha-conta/pedidos')
@@ -286,8 +331,8 @@ async function sendOrderEmail(orderId: string, type: NotificationType): Promise<
   const postalCode = String(address.cep ?? '').replace(/^(\d{5})(\d{3})$/, '$1-$2')
   const addressHtml =
     street || city
-      ? `<div style="margin-top:24px;padding:18px;border-radius:14px;background:#f7f7f5">
-          <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#737373">Endereço de entrega</div>
+      ? `<div style="margin-top:24px;padding:18px;border-radius:14px;background:${SURFACE_COLOR}">
+          <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:${MUTED_COLOR}">Endereço de entrega</div>
           <div style="margin-top:8px;font-size:14px;line-height:1.55;color:${ink}">
             ${escapeHtml(street)}${street && city ? '<br>' : ''}${escapeHtml(city)}
             ${postalCode ? `<br>CEP ${escapeHtml(postalCode)}` : ''}
@@ -296,12 +341,12 @@ async function sendOrderEmail(orderId: string, type: NotificationType): Promise<
       : ''
   const productsHtml = rows
     ? `<div style="margin-top:26px">
-        <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#737373">Resumo do pedido</div>
+        <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:${MUTED_COLOR}">Resumo do pedido</div>
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:8px">${rows}</table>
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:14px">
           ${
             Number(order.frete) > 0
-              ? `<tr><td style="padding:4px 0;color:#737373;font-size:14px">Frete</td><td align="right" style="padding:4px 0;font-size:14px">${escapeHtml(formatCurrency(Number(order.frete)))}</td></tr>`
+              ? `<tr><td style="padding:4px 0;color:${MUTED_COLOR};font-size:14px">Frete</td><td align="right" style="padding:4px 0;font-size:14px">${escapeHtml(formatCurrency(Number(order.frete)))}</td></tr>`
               : ''
           }
           <tr><td style="padding:8px 0 0;font-size:17px;font-weight:800;color:${ink}">${
@@ -312,7 +357,7 @@ async function sendOrderEmail(orderId: string, type: NotificationType): Promise<
     : ''
   const ordersButton = ordersUrl
     ? `<div style="margin-top:28px">
-        <a href="${escapeHtml(ordersUrl)}" style="display:inline-block;padding:14px 24px;border-radius:999px;background:${brand};color:${ink};text-decoration:none;font-size:14px;font-weight:800">Ver meus pedidos</a>
+        <a href="${escapeHtml(ordersUrl)}" style="display:inline-block;padding:14px 24px;border-radius:12px;background:${brand};color:#ffffff;text-decoration:none;font-size:14px;font-weight:700">Ver meus pedidos</a>
       </div>`
     : ''
   const subject =
@@ -330,8 +375,8 @@ async function sendOrderEmail(orderId: string, type: NotificationType): Promise<
           preview: `O pedido #${shortOrderId} foi registrado e aguarda o pagamento.`,
           branding,
           content: `<p style="margin:0;font-size:16px;line-height:1.65">Olá, ${firstName}.</p>
-            <div style="margin:20px 0;padding:16px 18px;border-left:5px solid ${brand};border-radius:0 12px 12px 0;background:#f7f7f5">
-              <div style="font-size:13px;color:#737373">Pedido #${shortOrderId}</div>
+            <div style="margin:20px 0;padding:16px 18px;border-left:4px solid ${brand};border-radius:0 12px 12px 0;background:${SURFACE_COLOR}">
+              <div style="font-size:13px;color:${MUTED_COLOR}">Pedido #${shortOrderId}</div>
               <div style="margin-top:5px;font-size:16px;font-weight:800;color:${ink}">Pedido registrado · Aguardando pagamento</div>
             </div>
             <p style="margin:0;font-size:16px;line-height:1.65">
@@ -348,8 +393,8 @@ async function sendOrderEmail(orderId: string, type: NotificationType): Promise<
             preview: `Recebemos o pagamento do pedido #${shortOrderId}.`,
             branding,
             content: `<p style="margin:0;font-size:16px;line-height:1.65">Olá, ${firstName}.</p>
-            <div style="margin:20px 0;padding:16px 18px;border-left:5px solid ${brand};border-radius:0 12px 12px 0;background:#f7f7f5">
-              <div style="font-size:13px;color:#737373">Pedido #${shortOrderId}</div>
+            <div style="margin:20px 0;padding:16px 18px;border-left:4px solid ${brand};border-radius:0 12px 12px 0;background:${SURFACE_COLOR}">
+              <div style="font-size:13px;color:${MUTED_COLOR}">Pedido #${shortOrderId}</div>
               <div style="margin-top:5px;font-size:16px;font-weight:800;color:${ink}">Pagamento aprovado · Preparando para envio</div>
             </div>
             <p style="margin:0;font-size:16px;line-height:1.65">
@@ -369,20 +414,20 @@ async function sendOrderEmail(orderId: string, type: NotificationType): Promise<
             <p style="margin:14px 0 0;font-size:16px;line-height:1.65">
               Boa notícia: o pedido <strong>#${shortOrderId}</strong> já está a caminho.
             </p>
-            <div style="margin:24px 0;padding:22px;border-radius:16px;background:#f7f7f5;text-align:center">
-              <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#737373">Código de rastreio</div>
+            <div style="margin:24px 0;padding:22px;border-radius:16px;background:${SURFACE_COLOR};text-align:center">
+              <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:${MUTED_COLOR}">Código de rastreio</div>
               <div style="margin-top:10px;font-size:23px;font-weight:800;letter-spacing:.08em;color:${ink}">
                 ${escapeHtml(order.codigo_rastreio ?? '')}
               </div>
               ${
                 order.url_rastreio
-                  ? `<a href="${escapeHtml(order.url_rastreio)}" style="display:inline-block;margin-top:18px;padding:14px 24px;border-radius:999px;background:${brand};color:${ink};text-decoration:none;font-size:14px;font-weight:800">Acompanhar entrega</a>`
+                  ? `<a href="${escapeHtml(order.url_rastreio)}" style="display:inline-block;margin-top:18px;padding:14px 24px;border-radius:12px;background:${brand};color:#ffffff;text-decoration:none;font-size:14px;font-weight:700">Acompanhar entrega</a>`
                   : ''
               }
             </div>
             ${
               order.frete_servico || order.frete_prazo_dias
-                ? `<p style="margin:0;color:#737373;font-size:14px;line-height:1.55">
+                ? `<p style="margin:0;color:${MUTED_COLOR};font-size:14px;line-height:1.55">
                     Envio${order.frete_servico ? ` por ${escapeHtml(order.frete_servico)}` : ''}${order.frete_prazo_dias ? ` · Prazo estimado de ${order.frete_prazo_dias} dias úteis após a postagem` : ''}.
                   </p>`
                 : ''
@@ -394,9 +439,9 @@ async function sendOrderEmail(orderId: string, type: NotificationType): Promise<
               preview: `O pedido #${shortOrderId} foi cancelado.`,
               branding,
               content: `<p style="margin:0;font-size:16px;line-height:1.65">Olá, ${firstName}.</p>
-              <div style="margin:20px 0;padding:16px 18px;border-left:5px solid #dc2626;border-radius:0 12px 12px 0;background:#fef2f2">
-                <div style="font-size:13px;color:#737373">Pedido #${shortOrderId}</div>
-                <div style="margin-top:5px;font-size:16px;font-weight:800;color:#991b1b">Pedido cancelado</div>
+              <div style="margin:20px 0;padding:16px 18px;border-left:4px solid #D92D20;border-radius:0 12px 12px 0;background:#FEF3F2">
+                <div style="font-size:13px;color:${MUTED_COLOR}">Pedido #${shortOrderId}</div>
+                <div style="margin-top:5px;font-size:16px;font-weight:800;color:#B42318">Pedido cancelado</div>
               </div>
               <p style="margin:0;font-size:16px;line-height:1.65">
                 Confirmamos o cancelamento do seu pedido. Caso o pagamento já tenha sido aprovado,
@@ -470,8 +515,8 @@ export async function sendNewOrderAdminEmail(orderId: string): Promise<EmailResu
   const customerName = escapeHtml(user?.nome?.trim() || 'Cliente')
   const customerEmail = escapeHtml(user?.email?.trim() || '—')
   const shortOrderId = escapeHtml(order.id.slice(0, 8).toUpperCase())
-  const ink = safeColor(branding.color_ink, '#171717')
-  const brand = safeColor(branding.color_brand, '#c4f000')
+  const ink = inkColor(branding.color_ink)
+  const brand = brandColor(branding.color_brand)
   const items = order.itens_pedido ?? []
   const rows = productRows(items, ink)
   const adminOrdersUrl = absoluteUrl('/admin/pedidos')
@@ -495,12 +540,12 @@ export async function sendNewOrderAdminEmail(orderId: string): Promise<EmailResu
     content: `<p style="margin:0;font-size:16px;line-height:1.65">
         Um cliente acabou de fazer um novo pedido na loja.
       </p>
-      <div style="margin:20px 0;padding:16px 18px;border-left:5px solid ${brand};border-radius:0 12px 12px 0;background:#f7f7f5">
-        <div style="font-size:13px;color:#737373">Pedido #${shortOrderId}</div>
+      <div style="margin:20px 0;padding:16px 18px;border-left:4px solid ${brand};border-radius:0 12px 12px 0;background:${SURFACE_COLOR}">
+        <div style="font-size:13px;color:${MUTED_COLOR}">Pedido #${shortOrderId}</div>
         <div style="margin-top:5px;font-size:16px;font-weight:800;color:${ink}">
           ${escapeHtml(formatCurrency(Number(order.total)))} · ${statusLabel}
         </div>
-        <div style="margin-top:8px;font-size:14px;color:#525252">
+        <div style="margin-top:8px;font-size:14px;color:${MUTED_COLOR}">
           Cliente: <strong>${customerName}</strong> (${customerEmail})<br>
           Pagamento: ${paymentLabel}
         </div>
@@ -508,12 +553,12 @@ export async function sendNewOrderAdminEmail(orderId: string): Promise<EmailResu
       ${
         rows
           ? `<div style="margin-top:8px">
-              <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#737373">Itens</div>
+              <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:${MUTED_COLOR}">Itens</div>
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:8px">${rows}</table>
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:14px">
                 ${
                   Number(order.frete) > 0
-                    ? `<tr><td style="padding:4px 0;color:#737373;font-size:14px">Frete</td><td align="right" style="padding:4px 0;font-size:14px">${escapeHtml(formatCurrency(Number(order.frete)))}</td></tr>`
+                    ? `<tr><td style="padding:4px 0;color:${MUTED_COLOR};font-size:14px">Frete</td><td align="right" style="padding:4px 0;font-size:14px">${escapeHtml(formatCurrency(Number(order.frete)))}</td></tr>`
                     : ''
                 }
                 <tr><td style="padding:8px 0 0;font-size:17px;font-weight:800;color:${ink}">Total</td><td align="right" style="padding:8px 0 0;font-size:17px;font-weight:800;color:${ink}">${escapeHtml(formatCurrency(Number(order.total)))}</td></tr>
@@ -523,8 +568,8 @@ export async function sendNewOrderAdminEmail(orderId: string): Promise<EmailResu
       }
       ${
         street || city
-          ? `<div style="margin-top:24px;padding:18px;border-radius:14px;background:#f7f7f5">
-              <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#737373">Entrega</div>
+          ? `<div style="margin-top:24px;padding:18px;border-radius:14px;background:${SURFACE_COLOR}">
+              <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:${MUTED_COLOR}">Entrega</div>
               <div style="margin-top:8px;font-size:14px;line-height:1.55;color:${ink}">
                 ${escapeHtml(street)}${street && city ? '<br>' : ''}${escapeHtml(city)}
                 ${postalCode ? `<br>CEP ${escapeHtml(postalCode)}` : ''}
@@ -535,7 +580,7 @@ export async function sendNewOrderAdminEmail(orderId: string): Promise<EmailResu
       ${
         adminOrdersUrl
           ? `<div style="margin-top:28px">
-              <a href="${escapeHtml(adminOrdersUrl)}" style="display:inline-block;padding:14px 24px;border-radius:999px;background:${brand};color:${ink};text-decoration:none;font-size:14px;font-weight:800">Abrir pedidos no admin</a>
+              <a href="${escapeHtml(adminOrdersUrl)}" style="display:inline-block;padding:14px 24px;border-radius:12px;background:${brand};color:#ffffff;text-decoration:none;font-size:14px;font-weight:700">Abrir pedidos no admin</a>
             </div>`
           : ''
       }`,
@@ -589,8 +634,8 @@ export async function sendWelcomeEmail(userId: string): Promise<EmailResult> {
   }
 
   const firstName = escapeHtml(String(user.nome).trim().split(/\s+/)[0] || 'cliente')
-  const ink = safeColor(branding.color_ink, '#171717')
-  const brand = safeColor(branding.color_brand, '#c4f000')
+  const ink = inkColor(branding.color_ink)
+  const brand = brandColor(branding.color_brand)
   const catalogUrl = absoluteUrl('/catalogo')
   const html = emailTemplate({
     title: `Bem-vindo, ${firstName}!`,
@@ -599,21 +644,21 @@ export async function sendWelcomeEmail(userId: string): Promise<EmailResult> {
     content: `<p style="margin:0;font-size:16px;line-height:1.65">
         Sua conta foi criada com sucesso. Agora você pode comprar, salvar favoritos e acompanhar todos os seus pedidos em um só lugar.
       </p>
-      <div style="margin:24px 0;padding:20px;border-radius:16px;background:#f7f7f5">
+      <div style="margin:24px 0;padding:20px;border-radius:16px;background:${SURFACE_COLOR}">
         <div style="font-size:16px;font-weight:800;color:${ink}">Tudo pronto para começar</div>
-        <div style="margin-top:7px;color:#737373;font-size:14px;line-height:1.55">
-          Aproveite nossas ofertas e encontre os melhores suplementos para a sua rotina.
+        <div style="margin-top:7px;color:${MUTED_COLOR};font-size:14px;line-height:1.55">
+          Aproveite para conhecer nossa seleção de tênis, perfumes e muito mais.
         </div>
       </div>
       ${
         catalogUrl
-          ? `<a href="${escapeHtml(catalogUrl)}" style="display:inline-block;padding:14px 24px;border-radius:999px;background:${brand};color:${ink};text-decoration:none;font-size:14px;font-weight:800">Conhecer produtos</a>`
+          ? `<a href="${escapeHtml(catalogUrl)}" style="display:inline-block;padding:14px 24px;border-radius:12px;background:${brand};color:#ffffff;text-decoration:none;font-size:14px;font-weight:700">Conhecer produtos</a>`
           : ''
       }`,
   })
 
   try {
-    const resendId = await deliverEmail(user.email, 'Bem-vindo à Passarin Suplementos!', html)
+    const resendId = await deliverEmail(user.email, 'Bem-vindo à A&E Total Mix!', html)
     await supabase
       .from('user_email_notificacoes')
       .update({ resend_id: resendId, enviado_em: new Date().toISOString() })
@@ -628,8 +673,8 @@ export async function sendWelcomeEmail(userId: string): Promise<EmailResult> {
 export async function sendPasswordResetCode(email: string, code: string, name?: string | null) {
   const branding = await loadBranding()
   const firstName = escapeHtml(name?.trim().split(/\s+/)[0] || 'cliente')
-  const ink = safeColor(branding.color_ink, '#171717')
-  const brand = safeColor(branding.color_brand, '#c4f000')
+  const ink = inkColor(branding.color_ink)
+  const brand = brandColor(branding.color_brand)
   const html = emailTemplate({
     title: 'Recupere sua senha',
     preview: `Seu código de recuperação é ${code}.`,
@@ -638,11 +683,11 @@ export async function sendPasswordResetCode(email: string, code: string, name?: 
       <p style="margin:14px 0 0;font-size:16px;line-height:1.65">
         Use o código abaixo para criar uma nova senha. Ele expira em 15 minutos.
       </p>
-      <div style="margin:24px 0;padding:22px;border:2px solid ${brand};border-radius:16px;background:#f7f7f5;text-align:center">
-        <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#737373">Código de recuperação</div>
+      <div style="margin:24px 0;padding:22px;border:2px solid ${brand};border-radius:16px;background:${SURFACE_COLOR};text-align:center">
+        <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:${MUTED_COLOR}">Código de recuperação</div>
         <div style="margin-top:10px;font-size:32px;font-weight:800;letter-spacing:.22em;color:${ink}">${escapeHtml(code)}</div>
       </div>
-      <p style="margin:0;color:#737373;font-size:13px;line-height:1.55">
+      <p style="margin:0;color:${MUTED_COLOR};font-size:13px;line-height:1.55">
         Se você não solicitou a troca de senha, ignore este e-mail. Sua conta continua segura.
       </p>`,
   })

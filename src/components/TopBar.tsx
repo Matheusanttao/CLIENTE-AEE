@@ -1,7 +1,15 @@
-import { Headphones, PackageSearch, Shield, User, Zap } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useSiteSettings } from '../contexts/SiteSettingsContext'
+import { cn } from '../utils/cn'
+
+const baseLinkClass =
+  'whitespace-nowrap rounded underline-offset-4 transition-colors focus-visible:text-brand focus-visible:underline focus-visible:outline-none'
+const linkClass = cn(baseLinkClass, 'hover:text-brand')
+
+function Divider() {
+  return <span className="h-3 w-px bg-line" aria-hidden />
+}
 
 export function TopBar() {
   const { user, isAdmin } = useAuth()
@@ -9,42 +17,41 @@ export function TopBar() {
 
   if (!settings.topbar_enabled) return null
 
+  const text = settings.topbar_text?.trim()
+
   return (
-    <div className="bg-ink text-[11px] font-medium tracking-wide text-white/85">
-      <div className="container flex h-10 items-center justify-between gap-4">
-        <p className="flex items-center gap-2 whitespace-nowrap uppercase">
-          <Zap size={14} className="text-brand" fill="currentColor" />
-          <span>{settings.topbar_text}</span>
-        </p>
-        <div className="hidden items-center gap-7 md:flex">
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-2 transition hover:text-brand"
-          >
-            <Headphones size={14} /> Atendimento
+    <div className={cn('border-b border-line bg-surface text-xs text-muted', !text && 'hidden md:block')}>
+      {/* No mobile o aviso quebra linha em vez de ser cortado; do md em diante divide a linha com os atalhos. */}
+      <div className="container flex min-h-9 items-center justify-center gap-6 py-2 md:h-9 md:justify-between md:py-0">
+        <p className="min-w-0 text-center font-medium leading-snug md:truncate md:text-left">{text}</p>
+
+        <nav aria-label="Links rápidos" className="hidden shrink-0 items-center gap-4 md:flex">
+          <a href={whatsappUrl} target="_blank" rel="noreferrer" className={linkClass}>
+            Atendimento
           </a>
-          <Link to="/rastrear-pedido" className="flex items-center gap-2 transition hover:text-brand">
-            <PackageSearch size={14} /> Rastrear pedido
+          <Divider />
+          <Link to="/rastrear-pedido" className={linkClass}>
+            Rastrear pedido
           </Link>
+          <Divider />
           {user ? (
-            <>
-              <Link to="/minha-conta" className="flex items-center gap-2 whitespace-nowrap transition hover:text-brand">
-                <User size={14} /> Minha conta
-              </Link>
-              {isAdmin && (
-                <Link to="/admin" className="flex items-center gap-2 whitespace-nowrap text-brand transition hover:text-white">
-                  <Shield size={14} /> Admin
-                </Link>
-              )}
-            </>
+            <Link to="/minha-conta" className={linkClass}>
+              Minha conta
+            </Link>
           ) : (
-            <Link to="/login" className="flex items-center gap-2 whitespace-nowrap transition hover:text-brand">
-              <User size={14} /> Entrar / Cadastrar
+            <Link to="/login" className={linkClass}>
+              Entrar / Cadastrar
             </Link>
           )}
-        </div>
+          {isAdmin && (
+            <>
+              <Divider />
+              <Link to="/admin" className={cn(baseLinkClass, 'font-semibold text-brand hover:text-brand-hover')}>
+                Admin
+              </Link>
+            </>
+          )}
+        </nav>
       </div>
     </div>
   )

@@ -35,9 +35,9 @@ export function MaskedInput({
   return (
     <div className={className}>
       {label && (
-        <label htmlFor={id} className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-muted">
+        <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-ink">
           {label}
-          {required && !optional ? ' *' : ''}
+          {required && !optional ? <span className="text-muted"> *</span> : null}
         </label>
       )}
       <Input
@@ -47,6 +47,7 @@ export function MaskedInput({
         placeholder={placeholder}
         disabled={disabled}
         required={Boolean(required) && !optional}
+        className="tabular-nums disabled:cursor-not-allowed disabled:bg-surface disabled:text-muted"
         value={display}
         onChange={(event) => {
           const next = maskValue(mask, event.target.value)

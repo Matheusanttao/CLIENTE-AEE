@@ -2,21 +2,20 @@ import type { Product } from '../types'
 import type { SiteSettings } from '../types/settings'
 
 export const SITE_URL = 'https://passarinsuplementos.com.br'
-export const SITE_NAME = 'Passarim Suplementos'
+export const SITE_NAME = 'A&E Total Mix'
 export const SITE_LOCALITY = 'Betim'
 export const SITE_REGION = 'MG'
 export const SITE_COUNTRY = 'BR'
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/passarin-logo.png`
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/aee-og.jpg`
 
 export const DEFAULT_KEYWORDS = [
-  'suplementos Betim',
-  'loja de suplementos Betim',
-  'whey protein Betim',
-  'creatina Betim',
-  'vitaminas Betim',
-  'Passarim Suplementos',
-  'suplementos fitness',
-  'pré-treino Betim',
+  'A&E Total Mix',
+  'tênis',
+  'perfumes',
+  'loja de tênis',
+  'tênis no atacado',
+  'perfumes no atacado',
+  'varejo e atacado',
 ].join(', ')
 
 export function absoluteUrl(path = '/') {
@@ -39,9 +38,8 @@ export function truncateText(value: string, max = 155) {
 
 export function buildProductDescription(product: Product) {
   const base = product.descricao?.trim()
-    || `Compre ${product.nome} (${product.marca}) na Passarim Suplementos em Betim.`
-  const withLocal = /betim/i.test(base) ? base : `${base} Disponível na Passarim Suplementos em Betim.`
-  return truncateText(withLocal)
+    || `Compre ${product.nome} (${product.marca}) na ${SITE_NAME}, no varejo e no atacado.`
+  return truncateText(base)
 }
 
 type BreadcrumbItem = { name: string; path: string }
@@ -50,7 +48,7 @@ export function buildOrganizationJsonLd(settings: SiteSettings) {
   const phone = settings.whatsapp_number?.replace(/\D/g, '')
   return {
     '@context': 'https://schema.org',
-    '@type': ['Organization', 'Store', 'HealthAndBeautyBusiness'],
+    '@type': ['Organization', 'Store'],
     '@id': `${SITE_URL}/#organization`,
     name: settings.store_name || SITE_NAME,
     url: SITE_URL,
@@ -192,7 +190,7 @@ export function buildCollectionPageJsonLd(options: {
     isPartOf: { '@id': `${SITE_URL}/#website` },
     about: {
       '@type': 'Thing',
-      name: `Suplementos em ${SITE_LOCALITY}`,
+      name: 'Tênis e perfumes no varejo e no atacado',
     },
   }
 }

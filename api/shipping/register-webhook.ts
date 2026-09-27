@@ -25,7 +25,7 @@ export default async function handler(request: VercelRequest, response: VercelRe
   const webhookToken = process.env.SUPERFRETE_WEBHOOK_TOKEN
   const userAgent =
     process.env.SUPERFRETE_USER_AGENT ??
-    'Passarin Suplementos (contato@passarinsuplementos.com.br)'
+    'A&E Total Mix (contato@passarinsuplementos.com.br)'
   const environment = process.env.SUPERFRETE_ENV ?? 'production'
   const baseUrl =
     environment === 'production' ? 'https://api.superfrete.com' : 'https://sandbox.superfrete.com'

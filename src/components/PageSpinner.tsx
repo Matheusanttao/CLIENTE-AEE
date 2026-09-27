@@ -1,4 +1,3 @@
-import { Loader2 } from 'lucide-react'
 import { cn } from '../utils/cn'
 
 export function PageSpinner({
@@ -13,16 +12,19 @@ export function PageSpinner({
   return (
     <div
       className={cn(
-        'grid place-items-center gap-3 text-center',
-        fullScreen ? 'min-h-screen bg-[#f4f5f2]' : 'min-h-[40vh] py-16',
+        'grid place-content-center justify-items-center gap-4 text-center',
+        fullScreen ? 'min-h-screen bg-white' : 'min-h-[40vh] py-16',
         className,
       )}
       role="status"
       aria-live="polite"
       aria-busy="true"
     >
-      <Loader2 className="h-10 w-10 animate-spin text-brand" strokeWidth={2.5} />
-      <p className="text-sm font-semibold text-muted">{label}</p>
+      <span
+        className="h-9 w-9 animate-spin rounded-full border-[3px] border-brand-soft border-t-brand"
+        aria-hidden
+      />
+      <p className="text-sm font-medium text-muted">{label}</p>
     </div>
   )
 }

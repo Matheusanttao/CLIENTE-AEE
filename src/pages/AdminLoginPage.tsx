@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, ArrowRight, Lock, Package, ShoppingBag } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Lock, Package, Settings, ShoppingBag, Tag } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import { Helmet } from 'react-helmet-async'
@@ -35,7 +35,7 @@ export function AdminLoginPage() {
       if (result.error) throw result.error
 
       const userId = result.data.user?.id
-      if (!userId) throw new Error('Nao foi possivel autenticar')
+      if (!userId) throw new Error('Não foi possível autenticar')
 
       const { data: profile, error: profileError } = await supabase
         .from('usuarios')
@@ -48,7 +48,7 @@ export function AdminLoginPage() {
       // Somente usuarios.role no banco libera admin — nunca user_metadata.
       if (profile?.role !== 'admin') {
         await supabase.auth.signOut()
-        throw new Error('Esta conta nao tem acesso ao painel administrativo')
+        throw new Error('Esta conta não tem acesso ao painel administrativo')
       }
 
       notify('Acesso liberado')
@@ -61,164 +61,134 @@ export function AdminLoginPage() {
   return (
     <>
       <Helmet>
-        <title>Admin - {storeName}</title>
+        <title>{`Admin · ${storeName}`}</title>
       </Helmet>
 
-      <div className="relative min-h-screen overflow-hidden bg-[#fcfcfb]">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(circle at 0% -10%, rgba(196, 240, 0, 0.18), transparent 28rem), radial-gradient(circle at 100% 0%, rgba(13, 15, 18, 0.04), transparent 26rem), linear-gradient(180deg, #f4f5f2 0%, #fcfcfb 42%)',
-          }}
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-24 top-16 h-72 w-72 rounded-full bg-brand/25 blur-[90px]"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -left-20 bottom-10 h-56 w-56 rounded-full bg-brand/15 blur-[80px]"
-        />
-
-        <div className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 py-6 sm:px-6 lg:px-8">
-          <header className="flex items-center justify-between gap-4 animate-float-up">
+      <div className="min-h-screen bg-surface">
+        <header className="border-b border-line bg-white">
+          <div className="container flex h-[72px] items-center justify-between gap-4">
             {settingsLoading ? (
-              <div className="h-10 w-48 animate-pulse rounded-xl bg-ink/10" aria-hidden />
+              <div className="h-10 w-36 animate-pulse rounded-lg bg-surface" aria-hidden />
             ) : (
-              <Link to="/" className="flex min-w-0 items-center gap-2.5 text-ink">
+              <Link to="/" className="flex min-w-0 items-center gap-3 text-ink" aria-label={`Ir para a loja ${storeName}`}>
                 {customLogo ? (
                   <img
                     src={settings.logo_url}
                     alt={storeName}
-                    className="h-10 w-auto max-w-[140px] object-contain object-left"
+                    className="h-10 w-auto max-w-[160px] object-contain object-left sm:h-11"
                     decoding="async"
                     fetchPriority="high"
                   />
                 ) : (
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand text-ink shadow-brand">
-                    <span className="font-display text-sm font-black tracking-tight">{brandInitials}</span>
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand text-white">
+                    <span className="text-sm font-bold tracking-tight">{brandInitials}</span>
                   </span>
                 )}
                 {(settings.logo_show_text || !customLogo) && (
-                  <span className="min-w-0 leading-none">
-                    <strong className="block truncate font-display text-xl font-extrabold tracking-tight">
-                      {storeName}
-                    </strong>
-                    <small className="block text-[9px] font-semibold uppercase tracking-[0.22em] text-muted">
-                      Painel admin
-                    </small>
-                  </span>
-                )}
-                {customLogo && !settings.logo_show_text && (
-                  <span className="min-w-0 leading-none">
-                    <small className="block text-[9px] font-semibold uppercase tracking-[0.22em] text-muted">
-                      Painel admin
-                    </small>
-                  </span>
+                  <span className="min-w-0 truncate text-lg font-bold tracking-tight">{storeName}</span>
                 )}
               </Link>
             )}
 
             <Link
               to="/"
-              className="inline-flex shrink-0 items-center gap-2 rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-ink shadow-sm transition hover:border-ink/20 hover:bg-surface"
+              className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-[#D0D5DD] hover:bg-surface"
             >
               <ArrowLeft size={16} />
               <span className="hidden sm:inline">Voltar para a loja</span>
               <span className="sm:hidden">Loja</span>
             </Link>
-          </header>
-
-          <div className="grid flex-1 items-center gap-10 py-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:py-16">
-            <div className="animate-float-up max-w-xl">
-              <span className="inline-flex items-center gap-2 rounded-full bg-brand-mint px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-ink">
-                <Lock size={12} />
-                Acesso restrito
-              </span>
-
-              <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.08] tracking-tight text-ink sm:text-5xl">
-                Entre no painel da{' '}
-                <span className="text-ink">sua loja</span>
-              </h1>
-              <p className="mt-4 max-w-md text-base leading-relaxed text-muted">
-                Gerencie produtos, pedidos e cupons com a mesma identidade visual da {storeName}.
-              </p>
-
-              <div className="mt-8 hidden gap-3 sm:grid sm:grid-cols-2">
-                <FeatureChip icon={<Package size={16} />} label="Catalogo e estoque" />
-                <FeatureChip icon={<ShoppingBag size={16} />} label="Pedidos e clientes" />
-              </div>
-            </div>
-
-            <div className="w-full max-w-[440px] justify-self-center lg:justify-self-end animate-float-up">
-              <div className="rounded-[1.75rem] border border-black/[0.06] bg-white p-7 shadow-soft sm:p-8">
-                <div className="mb-6">
-                  <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-surface px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">
-                    <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-                    Login seguro
-                  </div>
-                  <h2 className="font-display text-2xl font-bold tracking-tight text-ink">
-                    Entrar no admin
-                  </h2>
-                  <p className="mt-1 text-sm text-muted">Use sua conta administrativa.</p>
-                </div>
-
-                {user && !isAdmin && (
-                  <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-3.5 py-3 text-sm text-amber-950">
-                    A conta atual nao e administrativa. Entre com um usuario admin.
-                  </div>
-                )}
-
-                <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-muted">
-                      E-mail
-                    </label>
-                    <Input
-                      type="email"
-                      placeholder="admin@exemplo.com"
-                      autoComplete="username"
-                      {...register('email')}
-                    />
-                    {formState.errors.email && (
-                      <p className="mt-1 text-sm text-red-600">{formState.errors.email.message}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-muted">
-                      Senha
-                    </label>
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      autoComplete="current-password"
-                      {...register('password')}
-                    />
-                    {formState.errors.password && (
-                      <p className="mt-1 text-sm text-red-600">{formState.errors.password.message}</p>
-                    )}
-                  </div>
-                  <Button type="submit" disabled={formState.isSubmitting} className="mt-2 w-full">
-                    {formState.isSubmitting ? 'Entrando...' : 'Acessar painel'}
-                    {!formState.isSubmitting && <ArrowRight size={16} />}
-                  </Button>
-                </form>
-              </div>
-            </div>
           </div>
-        </div>
+        </header>
+
+        <main className="container grid items-center gap-8 py-10 sm:py-14 lg:min-h-[calc(100vh-72px)] lg:grid-cols-[minmax(0,1fr)_440px] lg:gap-16 lg:py-16">
+          <div className="mx-auto w-full max-w-[440px] lg:mx-0 lg:max-w-lg">
+            <p className="inline-flex items-center gap-2 text-sm font-semibold text-brand">
+              <Lock size={15} />
+              Acesso restrito
+            </p>
+            <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+              Painel administrativo
+            </h1>
+            <p className="mt-4 text-[15px] leading-relaxed text-muted">
+              Gerencie o catálogo, acompanhe pedidos e ajuste a aparência da {storeName} em um só lugar.
+            </p>
+
+            <ul className="mt-8 hidden gap-3 sm:grid sm:grid-cols-2">
+              <FeatureItem icon={<Package size={18} />} label="Catálogo e estoque" />
+              <FeatureItem icon={<ShoppingBag size={18} />} label="Pedidos e clientes" />
+              <FeatureItem icon={<Tag size={18} />} label="Cupons de desconto" />
+              <FeatureItem icon={<Settings size={18} />} label="Configurações da loja" />
+            </ul>
+          </div>
+
+          <div className="mx-auto w-full max-w-[440px] animate-float-up lg:mx-0 lg:justify-self-end">
+            <div className="rounded-2xl border border-line bg-white p-6 shadow-soft sm:p-8">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold tracking-tight text-ink">Entrar no painel</h2>
+                <p className="mt-1 text-sm leading-relaxed text-muted">Use sua conta administrativa para continuar.</p>
+              </div>
+
+              {user && !isAdmin && (
+                <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-900">
+                  A conta atual não é administrativa. Entre com um usuário admin.
+                </div>
+              )}
+
+              <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
+                <div className="grid gap-1.5">
+                  <label htmlFor="admin-login-email" className="text-sm font-medium text-ink">
+                    E-mail
+                  </label>
+                  <Input
+                    id="admin-login-email"
+                    type="email"
+                    placeholder="admin@exemplo.com"
+                    autoComplete="username"
+                    aria-invalid={Boolean(formState.errors.email)}
+                    {...register('email')}
+                  />
+                  {formState.errors.email && (
+                    <p className="text-sm text-danger">{formState.errors.email.message}</p>
+                  )}
+                </div>
+                <div className="grid gap-1.5">
+                  <label htmlFor="admin-login-password" className="text-sm font-medium text-ink">
+                    Senha
+                  </label>
+                  <Input
+                    id="admin-login-password"
+                    type="password"
+                    placeholder="••••••••"
+                    autoComplete="current-password"
+                    aria-invalid={Boolean(formState.errors.password)}
+                    {...register('password')}
+                  />
+                  {formState.errors.password && (
+                    <p className="text-sm text-danger">{formState.errors.password.message}</p>
+                  )}
+                </div>
+                <Button type="submit" disabled={formState.isSubmitting} className="mt-2 w-full">
+                  {formState.isSubmitting ? 'Entrando...' : 'Acessar painel'}
+                  {!formState.isSubmitting && <ArrowRight size={16} />}
+                </Button>
+              </form>
+            </div>
+            <p className="mt-4 text-center text-xs text-muted">
+              Área exclusiva para administradores da {storeName}.
+            </p>
+          </div>
+        </main>
       </div>
     </>
   )
 }
 
-function FeatureChip({ icon, label }: { icon: ReactNode; label: string }) {
+function FeatureItem({ icon, label }: { icon: ReactNode; label: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-black/[0.05] bg-white/80 px-4 py-3 text-sm font-semibold text-ink shadow-sm backdrop-blur">
-      <span className="grid h-8 w-8 place-items-center rounded-xl bg-brand text-ink">{icon}</span>
+    <li className="flex items-center gap-3 rounded-xl border border-line bg-white px-4 py-3 text-sm font-medium text-ink">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand-mint text-brand">{icon}</span>
       {label}
-    </div>
+    </li>
   )
 }
