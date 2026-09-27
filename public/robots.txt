@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Paginas publicas importantes
+Allow: /catalogo
+Allow: /produto/
+Allow: /rastrear-pedido
+Allow: /privacidade
+Allow: /termos
+Allow: /trocas-devolucoes
+
+# Nao indexar fluxos privados / checkout
+Disallow: /admin
+Disallow: /checkout
+Disallow: /minha-conta
+Disallow: /carrinho
+Disallow: /login
+Disallow: /api/
+
+Sitemap: https://passarinsuplementos.com.br/sitemap.xml

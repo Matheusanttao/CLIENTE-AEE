@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Passarim Suplementos | Loja de Suplementos em Betim</title>
+    <meta
+      name="description"
+      content="Loja de suplementos em Betim: whey protein, creatina, vitaminas e produtos fitness na Passarim Suplementos. Entrega rápida e compra segura."
+    />
+    <meta
+      name="keywords"
+      content="suplementos Betim, loja de suplementos Betim, whey protein Betim, creatina Betim, vitaminas Betim, Passarim Suplementos"
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Passarim Suplementos" />
+    <meta name="geo.region" content="BR-MG" />
+    <meta name="geo.placename" content="Betim" />
+    <link rel="canonical" href="https://passarinsuplementos.com.br/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Passarim Suplementos" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:title" content="Passarim Suplementos | Loja de Suplementos em Betim" />
+    <meta
+      property="og:description"
+      content="Loja de suplementos em Betim: whey protein, creatina, vitaminas e produtos fitness. Entrega rápida e compra segura."
+    />
+    <meta property="og:url" content="https://passarinsuplementos.com.br/" />
+    <meta property="og:image" content="https://passarinsuplementos.com.br/passarin-logo.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Passarim Suplementos | Loja de Suplementos em Betim" />
+    <meta
+      name="twitter:description"
+      content="Loja de suplementos em Betim: whey protein, creatina, vitaminas e produtos fitness."
+    />
+    <meta name="twitter:image" content="https://passarinsuplementos.com.br/passarin-logo.png" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": ["Store", "Organization"],
+        "name": "Passarim Suplementos",
+        "url": "https://passarinsuplementos.com.br/",
+        "logo": "https://passarinsuplementos.com.br/passarin-logo.png",
+        "description": "Loja de suplementos em Betim: whey protein, creatina, vitaminas e produtos fitness.",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Betim",
+          "addressRegion": "MG",
+          "addressCountry": "BR"
+        },
+        "areaServed": {
+          "@type": "City",
+          "name": "Betim"
+        }
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Splash imediato: cobre qualquer flash de layout/CSS default antes do React. -->
+    <style>
+      html {
+        background: #0d0f12;
+      }
+
+      html:not(.app-ready) {
+        overflow: hidden;
+      }
+
+      html:not(.app-ready) #root {
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      html.app-ready #root {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      #app-preloader {
+        --splash-brand: #c4f000;
+        --splash-ink: #0d0f12;
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: grid;
+        place-items: center;
+        margin: 0;
+        background:
+          radial-gradient(circle at 20% 0%, color-mix(in srgb, var(--splash-brand) 18%, transparent), transparent 42%),
+          radial-gradient(circle at 90% 100%, color-mix(in srgb, var(--splash-brand) 8%, transparent), transparent 40%),
+          var(--splash-ink);
+        color: #f6f7f4;
+        font-family: Sora, Inter, ui-sans-serif, system-ui, sans-serif;
+        transition: opacity 320ms ease, visibility 320ms ease;
+      }
+
+      #app-preloader.is-done {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      #app-preloader .splash {
+        display: grid;
+        justify-items: center;
+        gap: 1.25rem;
+        padding: 1.5rem;
+        text-align: center;
+        max-width: min(90vw, 28rem);
+      }
+
+      #app-preloader .mark {
+        display: grid;
+        place-items: center;
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 0.9rem;
+        background: var(--splash-brand);
+        color: var(--splash-ink);
+        box-shadow: 0 14px 30px -12px color-mix(in srgb, var(--splash-brand) 55%, transparent);
+      }
+
+      #app-preloader .mark svg {
+        width: 1.65rem;
+        height: 1.65rem;
+        fill: currentColor;
+      }
+
+      #app-preloader .logo {
+        display: block;
+        max-height: 4.5rem;
+        max-width: min(80vw, 16rem);
+        width: auto;
+        height: auto;
+        object-fit: contain;
+      }
+
+      #app-preloader .brand {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+        word-break: break-word;
+      }
+
+      #app-preloader .tag {
+        margin: 0.35rem 0 0;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: rgba(246, 247, 244, 0.55);
+      }
+
+      #app-preloader .spinner {
+        width: 1.75rem;
+        height: 1.75rem;
+        border: 2.5px solid rgba(246, 247, 244, 0.15);
+        border-top-color: var(--splash-brand);
+        border-radius: 50%;
+        animation: app-spin 0.7s linear infinite;
+      }
+
+      #app-preloader .hint {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: rgba(246, 247, 244, 0.5);
+      }
+
+      @keyframes app-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app-preloader" role="status" aria-live="polite" aria-busy="true">
+      <div class="splash">
+        <img class="logo" data-splash-logo alt="" hidden />
+        <span class="mark" data-splash-mark aria-hidden="true">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 2L4.5 13.5h6L11 22l8.5-11.5h-6L13 2z" />
+          </svg>
+        </span>
+        <div data-splash-text>
+          <p class="brand" data-splash-brand>Carregando...</p>
+          <p class="tag" data-splash-tag hidden></p>
+        </div>
+        <div class="spinner" aria-hidden="true"></div>
+        <p class="hint">Carregando...</p>
+      </div>
+    </div>
+    <script>
+      ;(function () {
+        try {
+          var raw = localStorage.getItem('m-ecommerce:site-settings:v1')
+          if (!raw) return
+          var s = JSON.parse(raw)
+          var root = document.getElementById('app-preloader')
+          if (!root || !s) return
+
+          var brand = (s.color_brand || '#c4f000').trim()
+          var ink = (s.color_ink || '#0d0f12').trim()
+          root.style.setProperty('--splash-brand', brand)
+          root.style.setProperty('--splash-ink', ink)
+          root.style.background =
+            'radial-gradient(circle at 20% 0%, color-mix(in srgb, ' +
+            brand +
+            ' 18%, transparent), transparent 42%), radial-gradient(circle at 90% 100%, color-mix(in srgb, ' +
+            brand +
+            ' 8%, transparent), transparent 40%), ' +
+            ink
+
+          var name = (s.store_name_short || s.store_name || '').trim()
+          var tagline = (s.store_tagline || '').trim()
+          var logoUrl = (s.logo_url || '').trim()
+          var logoEnabled = s.logo_enabled !== false && !!logoUrl
+          var showText = s.logo_show_text !== false || !logoEnabled
+
+          var logoImg = root.querySelector('[data-splash-logo]')
+          var mark = root.querySelector('[data-splash-mark]')
+          var brandEl = root.querySelector('[data-splash-brand]')
+          var tagEl = root.querySelector('[data-splash-tag]')
+          var textBlock = root.querySelector('[data-splash-text]')
+
+          if (logoEnabled && logoImg && mark) {
+            logoImg.src = logoUrl
+            logoImg.alt = (s.store_name || name || '').trim()
+            logoImg.hidden = false
+            mark.hidden = true
+          }
+
+          if (brandEl && name) brandEl.textContent = name
+          if (tagEl) {
+            tagEl.textContent = tagline
+            tagEl.hidden = !tagline
+          }
+          if (textBlock) textBlock.hidden = !showText
+          if (s.store_name) document.title = s.store_name
+        } catch (e) {}
+      })()
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
