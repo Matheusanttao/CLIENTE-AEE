@@ -54,7 +54,7 @@ function SearchForm({ className }: { className?: string }) {
         enterKeyHint="search"
         className={cn(
           'h-12 w-full rounded-xl border border-line bg-surface pl-12 pr-14 text-[15px] text-ink outline-none transition sm:pr-28',
-          'placeholder:text-muted hover:border-ink/25 focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/15',
+          'placeholder:text-muted hover:border-line-strong focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/15',
           'appearance-none [&::-webkit-search-cancel-button]:appearance-none',
         )}
       />

@@ -26,7 +26,7 @@ export function Button({
         'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20',
         'disabled:cursor-not-allowed disabled:opacity-50',
         variant === 'primary' && 'bg-brand text-white shadow-brand hover:bg-brand-hover',
-        variant === 'secondary' && 'border border-line bg-white text-ink shadow-sm hover:border-ink/25 hover:bg-surface',
+        variant === 'secondary' && 'border border-line bg-white text-ink shadow-sm hover:border-line-strong hover:bg-surface',
         variant === 'ghost' && 'bg-transparent text-ink hover:bg-surface',
         variant === 'danger' && 'bg-danger text-white shadow-sm hover:bg-[#a31d13]',
         className,

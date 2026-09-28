@@ -20,7 +20,7 @@ const baseClass =
 
 const variantClass = {
   primary: 'bg-brand text-white shadow-brand hover:bg-brand-hover',
-  secondary: 'border border-line bg-white text-ink shadow-sm hover:border-ink/25 hover:bg-surface',
+  secondary: 'border border-line bg-white text-ink shadow-sm hover:border-line-strong hover:bg-surface',
 } as const
 
 const sizeClass = {

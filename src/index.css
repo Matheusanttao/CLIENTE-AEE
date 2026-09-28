@@ -25,6 +25,8 @@
   /* Cinza claro (busca, filtros, fundos secundarios) */
   --color-surface: #eef1f6;
   --color-line: #d8dde6;
+  /* Borda de hover/estado ativo (mais definida que --color-line) */
+  --color-line-strong: #bcc5d3;
   /* Bege suave (cenarios de fotos e banner) */
   --color-sand: #e0d3c0;
   --color-sand-soft: #f2ebe1;
