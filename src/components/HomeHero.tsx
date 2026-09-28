@@ -21,51 +21,57 @@ export function HomeHero({ categories }: { categories: SiteCategory[] }) {
 
   return (
     <section aria-label="Destaques da loja">
-      {/* Mobile mostra a arte inteira (16/9); telas maiores cortam altura para nao empurrar a loja. */}
-      <div className="relative aspect-[16/9] w-full overflow-hidden bg-sand sm:aspect-[21/9] lg:aspect-[5/2] xl:aspect-[3/1]">
+      <div className="relative isolate w-full overflow-hidden bg-sand">
         <img
           src={isDefaultImage ? heroImage : optimizeCloudinaryUrl(heroImage, 1920)}
           alt={isDefaultImage ? 'Tênis e perfumes em cenário bege' : settings.hero_title || settings.store_name}
           fetchPriority="high"
           decoding="async"
-          // Arte enviada pela loja costuma ter texto/logo embutido: `contain` evita cortar.
-          className={cn(
-            'absolute inset-0 h-full w-full',
-            isDefaultImage ? 'object-cover object-[center_62%]' : 'object-contain',
-          )}
+          // A arte padrao deixa a metade esquerda vazia: deslocar o enquadramento mantem os produtos visiveis.
+          className={cn('absolute inset-0 -z-10 h-full w-full object-cover', isDefaultImage && 'object-[72%_center]')}
         />
-      </div>
 
-      <div className="container mt-8 flex flex-col items-center text-center sm:mt-10">
-        {settings.hero_eyebrow && (
-          <p className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.08em] text-ink shadow-sm">
-            <span className="h-2 w-2 rounded-full bg-brand" aria-hidden />
-            {settings.hero_eyebrow}
-          </p>
-        )}
+        {/* Veu claro para o texto escuro continuar legivel sobre a foto. */}
+        <div
+          className="absolute inset-0 -z-10 bg-gradient-to-b from-white/95 via-white/80 to-white/40 sm:bg-gradient-to-r sm:from-white/95 sm:via-white/75 sm:to-transparent"
+          aria-hidden
+        />
 
-        <h1 className="mt-4 max-w-3xl text-balance text-[2rem] font-extrabold leading-[1.05] tracking-tight text-ink sm:text-[2.75rem] lg:text-5xl">
-          {settings.hero_title}
-          {settings.hero_title_highlight && <span className="block text-brand">{settings.hero_title_highlight}</span>}
-        </h1>
+        <div className="container flex min-h-[420px] flex-col justify-center py-12 sm:min-h-[440px] sm:py-14 lg:min-h-[520px] lg:py-16">
+          <div className="max-w-xl">
+            {settings.hero_eyebrow && (
+              <p className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.08em] text-ink shadow-sm">
+                <span className="h-2 w-2 rounded-full bg-brand" aria-hidden />
+                {settings.hero_eyebrow}
+              </p>
+            )}
 
-        {settings.hero_subtitle && (
-          <p className="mt-4 max-w-xl text-[15px] font-medium leading-relaxed text-ink-soft sm:text-base">
-            {settings.hero_subtitle}
-          </p>
-        )}
+            <h1 className="mt-5 text-balance text-[2.125rem] font-extrabold leading-[1.05] tracking-tight text-ink sm:text-[2.75rem] lg:text-[3.25rem]">
+              {settings.hero_title}
+              {settings.hero_title_highlight && (
+                <span className="block text-brand">{settings.hero_title_highlight}</span>
+              )}
+            </h1>
 
-        <div className="mt-7 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-center">
-          <HomeCta to="/catalogo" size="lg">
-            {settings.hero_cta_label || 'Ver produtos'}
-          </HomeCta>
-          <HomeCta href="#atacado" variant="secondary" size="lg">
-            Comprar no atacado
-          </HomeCta>
+            {settings.hero_subtitle && (
+              <p className="mt-4 max-w-md text-[15px] font-medium leading-relaxed text-ink-soft sm:text-base">
+                {settings.hero_subtitle}
+              </p>
+            )}
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <HomeCta to="/catalogo" size="lg">
+                {settings.hero_cta_label || 'Ver produtos'}
+              </HomeCta>
+              <HomeCta href="#atacado" variant="secondary" size="lg">
+                Comprar no atacado
+              </HomeCta>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="container mt-9 grid grid-cols-2 gap-3 sm:mt-12 sm:gap-4">
+      <div className="container mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4">
         {homeCollections.map((collection) => (
           <HeroTile key={collection.key} collection={collection} to={homeCollectionPath(collection, categories)} />
         ))}
