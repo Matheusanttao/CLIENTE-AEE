@@ -4,6 +4,7 @@ import { useSiteSettings } from '../contexts/SiteSettingsContext'
 import { brandImages, brandPhoto, type BrandPhoto } from '../lib/brandImages'
 import { optimizeCloudinaryUrl } from '../lib/cloudinary'
 import type { SiteCategory } from '../types/settings'
+import { cn } from '../utils/cn'
 import { HomeCta } from './HomeCta'
 import { homeCollectionPath, homeCollections, type HomeCollection } from './homeCollections'
 
@@ -62,7 +63,8 @@ export function HomeHero({ categories }: { categories: SiteCategory[] }) {
               sizes={isDefaultImage ? '(min-width: 1280px) 400px, (min-width: 768px) 48vw, 100vw' : undefined}
               alt={isDefaultImage ? 'Tênis branco sobre tecido bege' : settings.hero_title || settings.store_name}
               fetchPriority="high"
-              className="absolute inset-0 h-full w-full object-cover"
+              // Imagem enviada pela loja costuma ter texto/logo embutido: `contain` evita cortar.
+              className={cn('absolute inset-0 h-full w-full', isDefaultImage ? 'object-cover' : 'object-contain')}
             />
           </div>
         </div>
@@ -77,29 +79,32 @@ export function HomeHero({ categories }: { categories: SiteCategory[] }) {
   )
 }
 
+/** Card de colecao: foto sangrando no card inteiro, com degrade escuro e rotulo sobreposto. */
 function HeroTile({ collection, to }: { collection: HomeCollection; to: string }) {
   const { photo, alt } = tilePhotos[collection.key]
 
   return (
     <Link
       to={to}
-      className="group flex min-w-0 flex-col overflow-hidden rounded-2xl bg-sand-soft shadow-card transition duration-200 hover:-translate-y-0.5 hover:bg-sand hover:shadow-soft focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 sm:flex-row"
+      className="group relative flex aspect-[4/5] min-w-0 items-end overflow-hidden rounded-2xl bg-sand shadow-card transition duration-200 hover:-translate-y-0.5 hover:shadow-soft focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/25 sm:aspect-[16/10] sm:rounded-3xl xl:aspect-auto xl:h-full"
     >
-      <div className="relative w-full shrink-0 overflow-hidden bg-sand sm:w-[40%] xl:w-[44%]">
-        <div className="aspect-[4/5]" aria-hidden />
-        <img
-          src={brandPhoto(photo, 400, 500)}
-          srcSet={`${brandPhoto(photo, 400, 500)} 400w, ${brandPhoto(photo, 800, 1000)} 800w`}
-          sizes="(min-width: 1280px) 180px, (min-width: 640px) 20vw, 46vw"
-          alt={alt}
-          loading="lazy"
-          decoding="async"
-          className="absolute inset-0 h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.03]"
-        />
-      </div>
-      <div className="flex min-w-0 flex-1 flex-col justify-center p-3.5 sm:p-5 xl:p-6">
-        <p className="text-base font-semibold tracking-tight text-ink sm:text-lg lg:text-xl">{collection.label}</p>
-        <span className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-brand sm:mt-2">
+      <img
+        src={brandPhoto(photo, 800, 800)}
+        srcSet={`${brandPhoto(photo, 500, 500)} 500w, ${brandPhoto(photo, 1000, 1000)} 1000w`}
+        sizes="(min-width: 1280px) 420px, (min-width: 640px) 48vw, 46vw"
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        className="absolute inset-0 h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105"
+      />
+
+      <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/30 to-transparent" aria-hidden />
+
+      <div className="relative w-full p-4 sm:p-5 xl:p-6">
+        <p className="text-lg font-extrabold leading-tight tracking-tight text-white sm:text-xl xl:text-2xl">
+          {collection.label}
+        </p>
+        <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm transition-colors group-hover:bg-brand sm:text-sm">
           Ver coleção
           <ArrowRight size={15} aria-hidden className="transition-transform group-hover:translate-x-0.5" />
         </span>
