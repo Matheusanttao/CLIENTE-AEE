@@ -151,7 +151,7 @@ export const defaultSiteSettings: SiteSettings = {
   hero_title_highlight: 'para o seu estilo',
   hero_subtitle: 'Escolha para você ou compre em quantidade para revender. Atendimento direto pelo WhatsApp.',
   hero_cta_label: 'Ver produtos',
-  hero_image_url: brandImages.heroSneaker,
+  hero_image_url: brandImages.heroBanner,
 
   meta_title: 'A&E Total Mix | Tênis e Perfumes no Varejo e Atacado',
   meta_description:
@@ -200,7 +200,12 @@ const legacyColors = new Set([
   '#0052cc',
   '#101828',
 ])
-const legacyImages = new Set(['/passarin-logo.png', '/hero-athlete.png'])
+const legacyImages = new Set([
+  '/passarin-logo.png',
+  '/hero-athlete.png',
+  // Foto de banco de imagens usada como banner antes da arte propria da loja.
+  brandImages.heroSneaker,
+])
 
 const legacyTextDefaults: Partial<Record<keyof SiteSettings, string[]>> = {
   store_tagline: ['Suplementos'],

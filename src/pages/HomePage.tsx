@@ -212,7 +212,7 @@ function TrustStrip({ settings }: { settings: SiteSettings }) {
   if (items.length === 0) return null
 
   return (
-    <section className="container mt-4 sm:mt-6" aria-label="Por que comprar com a gente">
+    <section className="container mt-10 sm:mt-14" aria-label="Por que comprar com a gente">
       <ul
         className={cn(
           'grid gap-px overflow-hidden rounded-2xl border border-line bg-line',

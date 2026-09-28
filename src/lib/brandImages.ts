@@ -31,7 +31,15 @@ export function brandPhoto(name: BrandPhoto, width: number, height?: number) {
   return unsplashUrl(photos[name], width, height)
 }
 
+/** Artes proprias da loja, servidas de `public/`. */
+export const storeImages = {
+  heroBanner: '/hero-banner.webp',
+  collectionSneakers: '/collection-sneakers.webp',
+  collectionPerfumes: '/collection-perfumes.webp',
+} as const
+
 export const brandImages = {
+  heroBanner: storeImages.heroBanner,
   heroSneaker: brandPhoto('sneakerBeige', 1400),
   heroPerfume: brandPhoto('perfumeStones', 1200),
   categorySneakers: brandPhoto('sneakerRed', 800, 1000),
