@@ -18,6 +18,7 @@ import {
 } from '../services/settings'
 import {
   buildWhatsappUrl,
+  darkenHex,
   defaultSiteSettings,
   lightenHex,
   type SiteSettings,
@@ -37,8 +38,9 @@ function applyTheme(settings: SiteSettings) {
   const root = document.documentElement
   root.style.setProperty('--color-brand', settings.color_brand)
   root.style.setProperty('--color-brand-hover', settings.color_brand_hover)
-  root.style.setProperty('--color-brand-soft', lightenHex(settings.color_brand, 0.86))
-  root.style.setProperty('--color-brand-mint', lightenHex(settings.color_brand, 0.93))
+  root.style.setProperty('--color-brand-deep', darkenHex(settings.color_brand_hover, 0.35))
+  root.style.setProperty('--color-brand-soft', lightenHex(settings.color_brand, 0.8))
+  root.style.setProperty('--color-brand-mint', lightenHex(settings.color_brand, 0.9))
   root.style.setProperty('--color-ink', settings.color_ink)
   root.style.setProperty('--color-ink-soft', lightenHex(settings.color_ink, 0.08))
   root.style.setProperty('--color-promo', settings.color_promo)

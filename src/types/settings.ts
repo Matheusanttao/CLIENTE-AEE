@@ -130,10 +130,10 @@ export const defaultSiteSettings: SiteSettings = {
   whatsapp_message: 'Olá! Gostaria de atendimento da A&E Total Mix.',
   whatsapp_button_enabled: true,
 
-  color_brand: '#0066FF',
-  color_brand_hover: '#0052CC',
-  color_ink: '#101828',
-  color_promo: '#0066FF',
+  color_brand: '#0057F5',
+  color_brand_hover: '#0042C4',
+  color_ink: '#0B1220',
+  color_promo: '#E11D2F',
 
   topbar_enabled: true,
   topbar_text: 'Varejo e atacado · Enviamos para todo o Brasil',
@@ -190,7 +190,16 @@ export const defaultSiteSettings: SiteSettings = {
  * Quando encontrados, dao lugar aos padroes da A&E Total Mix. Valores personalizados pelo admin sao mantidos.
  */
 const legacyBrandText = /passari[nm]|fit ?suplement|suplement|betim|whey|creatina/i
-const legacyColors = new Set(['#c4f000', '#b2dd00', '#0d0f12', '#dc2626'])
+const legacyColors = new Set([
+  '#c4f000',
+  '#b2dd00',
+  '#0d0f12',
+  '#dc2626',
+  // Paleta azul anterior, com contraste baixo demais para o layout atual.
+  '#0066ff',
+  '#0052cc',
+  '#101828',
+])
 const legacyImages = new Set(['/passarin-logo.png', '/hero-athlete.png'])
 
 const legacyTextDefaults: Partial<Record<keyof SiteSettings, string[]>> = {
@@ -286,6 +295,16 @@ export function mergeSiteSettings(partial?: Partial<SiteSettings> | null): SiteS
 export function buildWhatsappUrl(number: string, message: string) {
   const digits = number.replace(/\D/g, '')
   return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`
+}
+
+export function darkenHex(hex: string, amount = 0.3): string {
+  const cleaned = hex.replace('#', '')
+  if (cleaned.length !== 6) return hex
+  const num = Number.parseInt(cleaned, 16)
+  const mix = (channel: number) => Math.round(channel * (1 - amount))
+  return `#${[mix((num >> 16) & 255), mix((num >> 8) & 255), mix(num & 255)]
+    .map((v) => v.toString(16).padStart(2, '0'))
+    .join('')}`
 }
 
 export function lightenHex(hex: string, amount = 0.55): string {

@@ -67,8 +67,8 @@
       }
 
       #app-preloader {
-        --splash-brand: #0066ff;
-        --splash-ink: #101828;
+        --splash-brand: #0057f5;
+        --splash-ink: #0b1220;
         position: fixed;
         inset: 0;
         z-index: 2147483647;
@@ -193,8 +193,8 @@
           var root = document.getElementById('app-preloader')
           if (!root || !s) return
 
-          var brand = (s.color_brand || '#0066FF').trim()
-          var ink = (s.color_ink || '#101828').trim()
+          var brand = (s.color_brand || '#0057F5').trim()
+          var ink = (s.color_ink || '#0B1220').trim()
           root.style.setProperty('--splash-brand', brand)
           root.style.setProperty('--splash-ink', ink)
 

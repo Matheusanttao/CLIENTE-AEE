@@ -61,8 +61,8 @@ export function updateAppPreloaderBrand(brand: SplashBrand): void {
   const root = document.getElementById(PRELOADER_ID)
   if (!root) return
 
-  const brandColor = brand.color_brand?.trim() || '#0066FF'
-  const inkColor = brand.color_ink?.trim() || '#101828'
+  const brandColor = brand.color_brand?.trim() || '#0057F5'
+  const inkColor = brand.color_ink?.trim() || '#0B1220'
   root.style.setProperty('--splash-brand', brandColor)
   root.style.setProperty('--splash-ink', inkColor)
 
