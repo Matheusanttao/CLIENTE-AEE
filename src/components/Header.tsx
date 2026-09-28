@@ -53,15 +53,15 @@ function SearchForm({ className }: { className?: string }) {
         autoComplete="off"
         enterKeyHint="search"
         className={cn(
-          'h-12 w-full rounded-xl border border-transparent bg-surface pl-12 pr-14 text-[15px] text-ink outline-none transition sm:pr-28',
-          'placeholder:text-muted hover:border-line focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/15',
+          'h-12 w-full rounded-xl border border-line bg-surface pl-12 pr-14 text-[15px] text-ink outline-none transition sm:pr-28',
+          'placeholder:text-muted hover:border-ink/25 focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/15',
           'appearance-none [&::-webkit-search-cancel-button]:appearance-none',
         )}
       />
       <button
         type="submit"
         aria-label="Buscar"
-        className="absolute inset-y-1 right-1 inline-flex w-10 items-center justify-center gap-2 rounded-lg bg-brand text-sm font-semibold text-white transition-colors hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 sm:w-auto sm:px-5"
+        className="absolute inset-y-1 right-1 inline-flex w-10 items-center justify-center gap-2 rounded-lg bg-brand text-sm font-bold text-white shadow-brand transition-colors hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 sm:w-auto sm:px-5"
       >
         <ArrowRight size={18} aria-hidden className="sm:hidden" />
         <span className="hidden sm:inline">Buscar</span>
@@ -85,7 +85,7 @@ export function Header() {
   return (
     <>
       <TopBar />
-      <header className="sticky top-0 z-40 border-b border-line bg-white">
+      <header className="sticky top-0 z-40 border-b border-line bg-white shadow-sm">
         <div className="container grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2.5 pb-3 pt-2.5 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:gap-x-10 lg:py-3">
           <div className="flex min-w-0 items-center gap-1">
             <button

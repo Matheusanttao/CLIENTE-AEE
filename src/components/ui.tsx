@@ -25,10 +25,10 @@ export function Button({
         'inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-colors duration-200',
         'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20',
         'disabled:cursor-not-allowed disabled:opacity-50',
-        variant === 'primary' && 'bg-brand text-white shadow-sm hover:bg-brand-hover',
-        variant === 'secondary' && 'border border-line bg-white text-ink hover:border-[#d0d5dd] hover:bg-surface',
+        variant === 'primary' && 'bg-brand text-white shadow-brand hover:bg-brand-hover',
+        variant === 'secondary' && 'border border-line bg-white text-ink shadow-sm hover:border-ink/25 hover:bg-surface',
         variant === 'ghost' && 'bg-transparent text-ink hover:bg-surface',
-        variant === 'danger' && 'bg-danger text-white shadow-sm hover:bg-[#b42318]',
+        variant === 'danger' && 'bg-danger text-white shadow-sm hover:bg-[#a31d13]',
         className,
       )}
       {...props}
@@ -81,7 +81,7 @@ export function Skeleton({ className }: { className?: string }) {
 
 export function EmptyState({ title, description }: { title: string; description: string }) {
   return (
-    <div className="rounded-2xl border border-line bg-surface/60 px-6 py-12 text-center">
+    <div className="rounded-2xl border border-dashed border-line bg-surface px-6 py-12 text-center">
       <h3 className="text-lg font-semibold text-ink">{title}</h3>
       <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted">{description}</p>
     </div>
@@ -105,14 +105,16 @@ export function SectionHeader({
   return (
     <div className={cn('flex flex-wrap items-end justify-between gap-x-6 gap-y-3', className)}>
       <div className="min-w-0">
-        {eyebrow && <p className="text-sm font-semibold text-brand">{eyebrow}</p>}
-        <h2 className="mt-1 text-2xl font-bold tracking-tight text-ink sm:text-[1.75rem]">{title}</h2>
+        {eyebrow && <p className="text-xs font-bold uppercase tracking-[0.12em] text-brand">{eyebrow}</p>}
+        <h2 className="mt-1 text-[1.625rem] font-extrabold leading-tight tracking-tight text-ink sm:text-[2rem]">
+          {title}
+        </h2>
         {description && <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-muted">{description}</p>}
       </div>
       {action && (
         <Link
           to={action.to}
-          className="group inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-brand transition hover:text-brand-hover"
+          className="group inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-line bg-white px-4 text-sm font-semibold text-brand shadow-sm transition-colors hover:border-brand hover:bg-brand-mint focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20"
         >
           {action.label}
           <ArrowRight size={16} className="transition group-hover:translate-x-0.5" />

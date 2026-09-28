@@ -27,7 +27,7 @@ const linkClass =
 function FooterColumn({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div>
-      <h3 className="text-sm font-semibold text-ink">{title}</h3>
+      <h3 className="text-xs font-bold uppercase tracking-[0.1em] text-ink">{title}</h3>
       <ul className="mt-3 grid gap-0.5">{children}</ul>
     </div>
   )
@@ -40,7 +40,7 @@ export function Footer() {
   const secureText = settings.footer_secure_text?.trim()
 
   return (
-    <footer className="mt-16 border-t border-line bg-white md:mt-24">
+    <footer className="mt-16 border-t border-line bg-surface md:mt-24">
       <div className="container grid gap-10 py-12 sm:grid-cols-2 md:py-16 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-12">
         <div className="sm:col-span-2 lg:col-span-1">
           <StoreLogo size="lg" className="w-fit" />
@@ -48,7 +48,7 @@ export function Footer() {
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-muted">{settings.footer_about}</p>
           )}
           {settings.store_tagline && (
-            <p className="mt-4 inline-flex rounded-full bg-brand-mint px-3 py-1 text-xs font-semibold text-brand-hover">
+            <p className="mt-4 inline-flex rounded-full bg-brand px-3 py-1 text-xs font-bold text-white shadow-brand">
               {settings.store_tagline}
             </p>
           )}
@@ -97,7 +97,7 @@ export function Footer() {
             </li>
           )}
           {secureText && (
-            <li className="mt-3 flex items-start gap-2.5 rounded-xl bg-surface px-3 py-2.5 text-sm text-ink-soft">
+            <li className="mt-3 flex items-start gap-2.5 rounded-xl border border-line bg-white px-3 py-2.5 text-sm text-ink-soft shadow-sm">
               <ShieldCheck size={16} className="mt-0.5 shrink-0 text-brand" />
               <span>{secureText}</span>
             </li>

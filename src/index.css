@@ -10,39 +10,40 @@
   --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
   /* Azul principal (botoes, links, destaques) */
-  --color-brand: #0066ff;
-  --color-brand-hover: #0052cc;
+  --color-brand: #0057f5;
+  --color-brand-hover: #0042c4;
+  --color-brand-deep: #002a80;
   /* Azul claro (secao de atacado, detalhes suaves) */
-  --color-brand-soft: #dceeff;
-  --color-brand-mint: #eef6ff;
+  --color-brand-soft: #cfe3ff;
+  --color-brand-mint: #e6f0ff;
 
   /* Grafite (titulos e textos principais) */
-  --color-ink: #101828;
+  --color-ink: #0b1220;
   --color-ink-soft: #1d2939;
   /* Cinza medio (textos secundarios) */
-  --color-muted: #667085;
+  --color-muted: #4d5a6d;
   /* Cinza claro (busca, filtros, fundos secundarios) */
-  --color-surface: #f2f3f6;
-  --color-line: #e4e7ec;
+  --color-surface: #eef1f6;
+  --color-line: #d8dde6;
   /* Bege suave (cenarios de fotos e banner) */
-  --color-sand: #e8dfd2;
-  --color-sand-soft: #f5f0e9;
+  --color-sand: #e0d3c0;
+  --color-sand-soft: #f2ebe1;
 
-  --color-success: #12b76a;
-  --color-danger: #d92d20;
-  --color-promo: #0066ff;
+  --color-success: #07955a;
+  --color-danger: #c9271b;
+  --color-promo: #e11d2f;
 
   --radius-card: 1rem;
 
-  --shadow-soft: 0 12px 32px -12px rgba(16, 24, 40, 0.14);
-  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 12px -4px rgba(16, 24, 40, 0.06);
-  --shadow-brand: 0 6px 16px -8px rgba(0, 102, 255, 0.55);
+  --shadow-soft: 0 20px 44px -18px rgba(11, 18, 32, 0.28);
+  --shadow-card: 0 1px 2px rgba(11, 18, 32, 0.06), 0 10px 24px -12px rgba(11, 18, 32, 0.16);
+  --shadow-brand: 0 12px 24px -10px rgba(0, 87, 245, 0.55);
 }
 
 /* Em @layer base para nao sobrescrever utilitarios Tailwind (ex: text-white em links). */
 @layer base {
   :root {
-    color: #101828;
+    color: #0b1220;
     background: #ffffff;
     font-family: var(--font-sans);
     font-synthesis: none;
@@ -88,8 +89,8 @@
   }
 
   ::selection {
-    background: #dceeff;
-    color: #101828;
+    background: #cfe3ff;
+    color: #0b1220;
   }
 }
 
@@ -146,8 +147,8 @@
 }
 
 .admin-shell {
-  background: #f2f3f6;
-  color: #101828;
+  background: #eef1f6;
+  color: #0b1220;
 }
 
 .admin-metric {

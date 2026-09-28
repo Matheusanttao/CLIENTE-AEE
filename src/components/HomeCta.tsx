@@ -19,8 +19,8 @@ const baseClass =
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl px-5 text-sm font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20'
 
 const variantClass = {
-  primary: 'bg-brand text-white shadow-sm hover:bg-brand-hover',
-  secondary: 'border border-line bg-white text-ink hover:border-[#D0D5DD] hover:bg-surface',
+  primary: 'bg-brand text-white shadow-brand hover:bg-brand-hover',
+  secondary: 'border border-line bg-white text-ink shadow-sm hover:border-ink/25 hover:bg-surface',
 } as const
 
 const sizeClass = {

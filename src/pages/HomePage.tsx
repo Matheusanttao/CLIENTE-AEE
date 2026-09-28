@@ -94,7 +94,7 @@ export function HomePage() {
       />
 
       {settings.promo_banner_enabled && settings.promo_banner_text && (
-        <div className="bg-brand px-4 py-2.5 text-center text-sm font-medium text-white">
+        <div className="bg-brand px-4 py-2.5 text-center text-sm font-semibold text-white">
           {settings.promo_banner_text}
         </div>
       )}
@@ -167,7 +167,7 @@ export function HomePage() {
       <section className="container py-12 md:py-16">
         <div className="grid items-center gap-6 rounded-2xl border border-line bg-white p-6 shadow-card sm:p-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:gap-10">
           <div className="flex items-start gap-4">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-brand-soft text-brand" aria-hidden>
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-brand text-white shadow-brand" aria-hidden>
               <Mail size={22} />
             </span>
             <div className="min-w-0">
@@ -229,7 +229,7 @@ function TrustStrip({ settings }: { settings: SiteSettings }) {
               items.length > 1 && items.length % 2 === 1 && index === items.length - 1 && 'col-span-2 lg:col-span-1',
             )}
           >
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-soft text-brand" aria-hidden>
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand text-white shadow-brand" aria-hidden>
               <Icon size={19} />
             </span>
             <span className="min-w-0">
@@ -263,19 +263,19 @@ function BenefitsBand({ settings }: { settings: SiteSettings }) {
     <section className="container pt-12 md:pt-16" aria-label="Formas de pagamento e entrega">
       <ul
         className={cn(
-          'grid gap-5 rounded-2xl bg-surface p-6 sm:p-8',
+          'grid gap-5 rounded-2xl bg-ink p-6 shadow-soft sm:p-8',
           items.length === 2 && 'sm:grid-cols-2 sm:gap-8',
           items.length === 3 && 'md:grid-cols-3 md:gap-8',
         )}
       >
         {items.map(({ icon: Icon, title, text }, index) => (
           <li key={`${index}-${title}`} className="flex items-center gap-4">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-white text-brand shadow-card" aria-hidden>
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-brand text-white shadow-brand" aria-hidden>
               <Icon size={22} />
             </span>
             <span className="min-w-0">
-              <strong className="block text-[15px] font-semibold text-ink">{title}</strong>
-              {text && <span className="mt-0.5 block text-sm leading-relaxed text-muted">{text}</span>}
+              <strong className="block text-[15px] font-bold text-white">{title}</strong>
+              {text && <span className="mt-0.5 block text-sm leading-relaxed text-white/70">{text}</span>}
             </span>
           </li>
         ))}

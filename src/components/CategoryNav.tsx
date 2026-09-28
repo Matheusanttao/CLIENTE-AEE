@@ -20,7 +20,7 @@ const navLinkClass = (active: boolean, tone: 'default' | 'brand' = 'default') =>
     active ? 'after:opacity-100' : 'after:opacity-0',
     tone === 'brand'
       ? 'font-semibold text-brand hover:text-brand-hover'
-      : cn('font-medium focus-visible:text-brand', active ? 'text-brand' : 'text-ink/80 hover:text-brand'),
+      : cn('font-semibold focus-visible:text-brand', active ? 'text-brand' : 'text-ink-soft hover:text-brand'),
   )
 
 /** Barra de categorias do desktop (no mobile a gaveta do menu substitui). */

@@ -21,22 +21,22 @@ export function HomeHero({ categories }: { categories: SiteCategory[] }) {
   return (
     <section className="container mt-4 sm:mt-6" aria-label="Destaques da loja">
       <div className="grid gap-3 sm:gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <div className="grid overflow-hidden rounded-2xl bg-sand sm:rounded-3xl md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+        <div className="grid overflow-hidden rounded-2xl bg-gradient-to-br from-sand-soft via-sand to-sand shadow-card sm:rounded-3xl md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
           <div className="order-2 flex flex-col justify-center px-5 pb-7 pt-6 sm:p-8 md:order-1 md:py-10 lg:px-12 xl:px-10">
             {settings.hero_eyebrow && (
-              <p className="inline-flex w-fit items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-ink">
-                <span className="h-1.5 w-1.5 rounded-full bg-brand" aria-hidden />
+              <p className="inline-flex w-fit items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.08em] text-ink shadow-sm">
+                <span className="h-2 w-2 rounded-full bg-brand" aria-hidden />
                 {settings.hero_eyebrow}
               </p>
             )}
 
-            <h1 className="mt-4 text-balance text-[2rem] font-bold leading-[1.1] tracking-tight text-ink sm:text-[2.75rem] md:text-[2.5rem] lg:text-5xl xl:text-[2.75rem]">
+            <h1 className="mt-4 text-balance text-[2rem] font-extrabold leading-[1.05] tracking-tight text-ink sm:text-[2.75rem] md:text-[2.5rem] lg:text-5xl xl:text-[2.75rem]">
               {settings.hero_title}
               {settings.hero_title_highlight && <span className="block text-brand">{settings.hero_title_highlight}</span>}
             </h1>
 
             {settings.hero_subtitle && (
-              <p className="mt-4 max-w-md text-[15px] leading-relaxed text-ink/70 sm:text-base">
+              <p className="mt-4 max-w-md text-[15px] font-medium leading-relaxed text-ink-soft sm:text-base">
                 {settings.hero_subtitle}
               </p>
             )}
@@ -83,7 +83,7 @@ function HeroTile({ collection, to }: { collection: HomeCollection; to: string }
   return (
     <Link
       to={to}
-      className="group flex min-w-0 flex-col overflow-hidden rounded-2xl bg-sand-soft transition-colors duration-200 hover:bg-sand focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 sm:flex-row"
+      className="group flex min-w-0 flex-col overflow-hidden rounded-2xl bg-sand-soft shadow-card transition duration-200 hover:-translate-y-0.5 hover:bg-sand hover:shadow-soft focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 sm:flex-row"
     >
       <div className="relative w-full shrink-0 overflow-hidden bg-sand sm:w-[40%] xl:w-[44%]">
         <div className="aspect-[4/5]" aria-hidden />

@@ -37,7 +37,7 @@ export function ProductCard({ product }: { product: Product }) {
   const hasRating = product.total_avaliacoes > 0
 
   return (
-    <article className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-line bg-white transition duration-200 hover:border-[#D0D5DD] hover:shadow-soft">
+    <article className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-card transition duration-200 hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-soft">
       <div className="relative">
         <Link
           to={productUrl}
@@ -60,12 +60,12 @@ export function ProductCard({ product }: { product: Product }) {
         {(discount > 0 || soldOut) && (
           <div className="pointer-events-none absolute left-2.5 top-2.5 flex flex-col items-start gap-1.5 sm:left-3 sm:top-3">
             {discount > 0 && (
-              <span className="rounded-full bg-promo px-2 py-0.5 text-xs font-semibold text-white tabular-nums">
+              <span className="rounded-full bg-promo px-2 py-0.5 text-xs font-bold text-white shadow-sm tabular-nums">
                 -{discount}%
               </span>
             )}
             {soldOut && (
-              <span className="rounded-full border border-line bg-white/90 px-2 py-0.5 text-xs font-semibold text-ink">
+              <span className="rounded-full bg-ink px-2 py-0.5 text-xs font-semibold text-white">
                 Esgotado
               </span>
             )}
@@ -114,13 +114,13 @@ export function ProductCard({ product }: { product: Product }) {
               {formatCurrency(product.preco)}
             </p>
           )}
-          <p className="text-base font-bold tracking-tight text-ink tabular-nums sm:text-lg">
+          <p className="text-[17px] font-extrabold tracking-tight text-ink tabular-nums sm:text-xl">
             {onSale && <span className="sr-only">Por </span>}
             {formatCurrency(currentPrice)}
           </p>
           {pixPrice !== null && (
             <p className="mt-0.5 text-xs text-muted">
-              <span className="font-semibold text-brand tabular-nums">{formatCurrency(pixPrice)}</span> no Pix
+              <span className="font-bold text-success tabular-nums">{formatCurrency(pixPrice)}</span> no Pix
             </p>
           )}
         </div>
@@ -129,10 +129,10 @@ export function ProductCard({ product }: { product: Product }) {
           type="button"
           disabled={soldOut || isStoreDemoMode}
           className={cn(
-            'mt-3 inline-flex h-10 w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-3 text-[13px] font-semibold transition-colors duration-200 sm:h-11 sm:text-sm',
-            'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20',
-            'bg-brand-mint text-brand enabled:hover:bg-brand enabled:hover:text-white enabled:active:bg-brand-hover',
-            'disabled:cursor-not-allowed disabled:bg-surface disabled:text-muted',
+            'mt-3 inline-flex h-10 w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-3 text-[13px] font-bold transition-colors duration-200 sm:h-11 sm:text-sm',
+            'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/25',
+            'bg-brand text-white shadow-brand enabled:hover:bg-brand-hover enabled:active:bg-brand-deep',
+            'disabled:cursor-not-allowed disabled:bg-surface disabled:text-muted disabled:shadow-none',
           )}
           onClick={() => {
             if (requiresFlavor) {

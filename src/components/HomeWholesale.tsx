@@ -36,14 +36,14 @@ export function HomeWholesale() {
     >
       <div className="container grid items-center gap-10 py-12 md:py-16 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-16 xl:grid-cols-[minmax(0,1fr)_440px]">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-brand-hover">Atacado</p>
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-brand-hover">Atacado</p>
           <h2
             id="atacado-titulo"
-            className="mt-1 text-balance text-[1.75rem] font-bold leading-tight tracking-tight text-ink sm:text-4xl"
+            className="mt-1.5 text-balance text-[1.75rem] font-extrabold leading-[1.1] tracking-tight text-ink sm:text-4xl"
           >
             Compre em quantidade para revender
           </h2>
-          <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-ink/70 sm:text-base">
+          <p className="mt-4 max-w-xl text-[15px] font-medium leading-relaxed text-ink-soft sm:text-base">
             Monte seu pedido com os modelos que quiser e fale com a nossa equipe pelo WhatsApp para combinar
             quantidades, valores e envio.
           </p>
@@ -55,7 +55,7 @@ export function HomeWholesale() {
                 className="flex gap-4 rounded-2xl bg-white p-4 shadow-card sm:flex-col sm:gap-3 sm:p-5"
               >
                 <span
-                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-soft text-sm font-bold text-brand-hover tabular-nums"
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand text-sm font-bold text-white shadow-brand tabular-nums"
                   aria-hidden
                 >
                   {index + 1}
